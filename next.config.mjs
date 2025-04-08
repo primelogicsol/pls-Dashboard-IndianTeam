@@ -18,8 +18,8 @@ const nextConfig = {
   },
   experimental: {
     webpackBuildWorker: false,
-    parallelServerBuildTraces: true,
-    parallelServerCompiles: true,
+    parallelServerBuildTraces: false,
+    parallelServerCompiles: false,
   },
   devIndicators: {
     buildActivity: false,
