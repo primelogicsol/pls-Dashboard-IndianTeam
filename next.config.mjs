@@ -17,7 +17,7 @@ const nextConfig = {
     unoptimized: true,
   },
   experimental: {
-    webpackBuildWorker: true,
+    webpackBuildWorker: false,
     parallelServerBuildTraces: true,
     parallelServerCompiles: true,
   },
