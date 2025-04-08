@@ -19,11 +19,8 @@ const nextConfig = {
   experimental: {
     webpackBuildWorker: false,
     parallelServerBuildTraces: false,
-    parallelServerCompiles: false,
-  },
-  devIndicators: {
-    buildActivity: false,
-  },
+    parallelServerCompiles: false
+  }
 }
 
 mergeConfig(nextConfig, userConfig)
