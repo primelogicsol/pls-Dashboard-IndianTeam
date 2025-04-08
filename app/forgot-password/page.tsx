@@ -5,7 +5,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import { ForgotPasswordForm } from "@/components/forgot-password/forgot-password-form";
-import forgotPasswordImg from "@/assets/forgotPassword.jpeg";
+import forgotPasswordImg from "@/assets/forgotPassword.png";
 
 export const metadata: Metadata = {
   title: "Forgot Password",
