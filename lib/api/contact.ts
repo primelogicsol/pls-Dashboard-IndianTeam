@@ -60,12 +60,7 @@ export async function getAllContactUsMessages(page = 1) {
   const accessToken = userDetails?.accessToken;
   
   try {
-    const response = await contactUsInstance.get(`/getAllMessages?page=${page}`, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-      },
-    });
+    const response = await contactUsInstance.get(`/getAllMessages?page=${page}`);
 
     if (response.status === 200) {
       return response.data;

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import { ForgotPasswordForm } from "@/components/forgot-password/forgot-password-form";
-
+import forgotPasswordImg from "@/assets/forgotPassword.jpeg";
 
 export const metadata: Metadata = {
   title: "Forgot Password",
@@ -26,14 +26,14 @@ export default function ForgotPasswordPage() {
           Login
         </Link>
         <div className="relative hidden h-full flex-col bg-muted p-10 text-white dark:border-r lg:flex">
-          {/* <Image
+          <Image
             src={forgotPasswordImg}
             alt="Background Image"
             layout="fill" 
             objectFit="cover" 
             quality={100} 
             className="absolute inset-0"
-          /> */}
+          />
 
           {/* <div className="relative z-20 flex items-center text-lg font-medium">
             <svg

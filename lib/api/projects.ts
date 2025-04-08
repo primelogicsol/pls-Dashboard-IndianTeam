@@ -332,6 +332,7 @@ export async function getTrashedConsultations() {
     }
   }
 }
+
 export async function createAProject(data: any) {
   try {
     const response = await apiInstance.post("/project/createProject", data);
@@ -350,3 +351,4 @@ export async function createAProject(data: any) {
     }
   }
 }
+

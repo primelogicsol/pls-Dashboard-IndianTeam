@@ -24,6 +24,7 @@ export type TUPDATE_PROJECT = {
   isDeadlineNeedToBeExtend: boolean;
   difficultyLevel: TDIFFICULTYLEVEL;
   milestones: Milestone[];
+  phone: string;
 };
 
 export type TPROJECT = TUPDATE_PROJECT & {

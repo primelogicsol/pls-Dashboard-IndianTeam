@@ -15,6 +15,8 @@ import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Eye } from "lucide-react";
 
 interface User {
   uid: string;
@@ -22,12 +24,20 @@ interface User {
   fullName: string;
   email: string;
   emailVerifiedAt: string | null;
+  role: string;
+  createdAt: string;
+  updatedAt: string;
+  projects: any[];
+  address: string | null;
+  phone: string | null;
 }
 
 export default function Page() {
   const [users, setUsers] = useState<User[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [search, setSearch] = useState("");
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [pagination, setPagination] = useState({
     totalPages: 1,
     totalUsers: 0,
@@ -128,7 +138,14 @@ export default function Page() {
                     {user.emailVerifiedAt ? "Verified" : "Not Verified"}
                   </span>
                 </TableCell>
-                <TableCell>
+                <TableCell className="flex items-center gap-2">
+                <Button variant="secondary" onClick={() => {
+                    setSelectedUser(user);
+                    setIsDialogOpen(true);
+                  }}>
+                    <Eye className="h-2 w-2"/>
+                    View
+                  </Button>
                   <Button
                     variant="destructive"
                     className="flex items-center gap-2"
@@ -148,11 +165,33 @@ export default function Page() {
           )}
         </TableBody>
       </Table>
+      {/* User Details Dialog */}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>User Details</DialogTitle>
+          </DialogHeader>
+          {selectedUser && (
+            <div className="space-y-2">
+              <p><strong>Username:</strong> {selectedUser.username}</p>
+              <p><strong>Full Name:</strong> {selectedUser.fullName}</p>
+              <p><strong>Email:</strong> {selectedUser.email}</p>
+              <p><strong>Role:</strong> {selectedUser.role}</p>
+              <p><strong>Email Verified:</strong> {selectedUser.emailVerifiedAt ? "Yes" : "No"}</p>
+              <p><strong>Created At:</strong> {new Date(selectedUser.createdAt).toLocaleString()}</p>
+              <p><strong>Updated At:</strong> {new Date(selectedUser.updatedAt).toLocaleString()}</p>
+              <p><strong>Phone:</strong> {selectedUser.phone || "N/A"}</p>
+              <p><strong>Address:</strong> {selectedUser.address || "N/A"}</p>
+              <p><strong>Projects:</strong> {selectedUser.projects.length > 0 ? selectedUser.projects.join(", ") : "None"}</p>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Pagination Controls */}
       <div className="flex justify-between items-center mt-4">
         <span className="text-gray-600">
-          Page {pagination.currentPage} - {pagination.totalUsers} 
+          Page {pagination.currentPage} - {pagination.totalPages} 
         </span>
         <div className="flex gap-2">
           <Button

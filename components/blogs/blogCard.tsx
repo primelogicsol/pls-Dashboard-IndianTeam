@@ -97,7 +97,7 @@ export function BlogCard({
             variant={blog.isPublic ? "default" : "secondary"}
             className="flex gap-1 items-center"
           >
-            {blog.isPublic ? (
+            {blog.isPublished ? (
               <>
                 <Globe className="h-3 w-3" />
                 <span>Public</span>
@@ -128,7 +128,7 @@ export function BlogCard({
             htmlFor={`visibility-${blog.blogId}`}
             className="text-sm cursor-pointer"
           >
-            {blog.isPublic ? "Public" : "Private"}
+            {blog.isPublished ? "Public" : "Private"}
           </Label>
           <Dialog
             open={showVisibilityDialog}

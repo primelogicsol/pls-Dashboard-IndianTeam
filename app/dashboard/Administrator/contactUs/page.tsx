@@ -32,6 +32,7 @@ const MessagesPage = () => {
     lastName: string;
     message: string;
     createdAt: string;
+    from: string;
   }
 
   const [messages, setMessages] = useState<Message[]>([]);
@@ -67,7 +68,8 @@ const MessagesPage = () => {
     try {
       await trashAMessage(id);
       toast.success("Message successfully moved to trash!");
-      setMessages((prev) => prev.filter((msg) => msg.id !== id));
+      // setMessages((prev) => prev.filter((msg) => msg.id !== id)); // Optimistic UI update (optional)
+      fetchMessages(); // Refetch messages after trashing
     } catch (error) {
       console.error("Error trashing message:", error);
       toast.error("Failed to trash the message. Please try again.");
@@ -82,7 +84,8 @@ const MessagesPage = () => {
       const matchesSearch =
         msg.email.toLowerCase().includes(searchQuery) ||
         msg.firstName.toLowerCase().includes(searchQuery) ||
-        msg.lastName.toLowerCase().includes(searchQuery);
+        msg.lastName.toLowerCase().includes(searchQuery) ||
+        msg.from.toLowerCase().includes(searchQuery);
 
       const matchesDate =
         (!fromDate || messageDate >= new Date(fromDate)) &&
@@ -133,7 +136,9 @@ const MessagesPage = () => {
               <TableHead className="text-center font-bold">Email</TableHead>
               <TableHead className="text-center font-bold">Message</TableHead>
               <TableHead className="text-center font-bold">Date</TableHead>
+              <TableHead className="text-center font-bold">User Role</TableHead>
               <TableHead className="text-center font-bold">Actions</TableHead>
+              
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -172,6 +177,7 @@ const MessagesPage = () => {
                   <TableCell className="text-center">
                     {format(new Date(msg.createdAt), "PPP")}
                   </TableCell>
+                  <TableCell className="text-center">{msg.from}</TableCell>
                   <TableCell className="text-center">
                     <Button
                       variant="destructive"
