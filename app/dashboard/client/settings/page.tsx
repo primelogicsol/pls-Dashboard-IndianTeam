@@ -18,8 +18,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-
-import { getUserDetails } from "@/lib/api/storage";
 import {
   sendOtp,
   sendOtpForVerifyingUser,
@@ -30,12 +28,10 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 
 const profileFormSchema = z.object({
-  username: z
-    .string()
-    .min(4, { message: "Username must be at least 4 characters." }),
-  fullName: z
-    .string()
-    .min(4, { message: "Full Name must be at least 4 characters." }),
+  username: z.string().min(4, { message: "Username must be at least 4 characters." }),
+  fullName: z.string().min(4, { message: "Full Name must be at least 4 characters." }),
+  address: z.string().min(4, { message: "Full Name must be at least 4 characters." }),
+  phone: z.string().min(10, { message: "Phone Number must be at least 10 digits." }),
 });
 
 const emailFormSchema = z.object({
@@ -44,10 +40,9 @@ const emailFormSchema = z.object({
 });
 
 export default function ClientSettingsPage() {
-  const { isAuthorized } = useAuth(["CLIENT"]);
-
   const [showOtpSection, setShowOtpSection] = useState(false);
   const [email, setEmail] = useState("");
+  const { isAuthorized } = useAuth(["CLIENT"]);
 
   const profileForm = useForm<z.infer<typeof profileFormSchema>>({
     resolver: zodResolver(profileFormSchema),
@@ -59,19 +54,14 @@ export default function ClientSettingsPage() {
     defaultValues: { email: "", otp: "" },
   });
 
- 
-  if (!isAuthorized) return null; // Prevent rendering if unauthorized
-
-  async function onProfileSubmit(data: { username: string; fullName: string }) {
+  async function onProfileSubmit(data: { username: string; fullName: string, address: string, phone: string }) {
     try {
-      await updateUserInfo(data.username, data.fullName);
+      await updateUserInfo(data.username, data.fullName, data.address, data.phone);
       toast.success("Profile updated successfully!");
     } catch (error: any) {
       profileForm.setError("username", {
         type: "manual",
-        message:
-          error?.response?.data?.details?.[0]?.message ||
-          "An error occurred while updating profile.",
+        message: error?.response?.data?.details?.[0]?.message || "An error occurred while updating profile.",
       });
     }
   }
@@ -86,9 +76,7 @@ export default function ClientSettingsPage() {
     } catch (error: any) {
       emailForm.setError("email", {
         type: "manual",
-        message:
-          error?.response?.data?.details?.[0]?.message ||
-          "An error occurred while updating email.",
+        message: error?.response?.data?.details?.[0]?.message || "An error occurred while updating email.",
       });
     }
   }
@@ -108,6 +96,8 @@ export default function ClientSettingsPage() {
       toast.error(error?.error || "OTP verification failed.");
     }
   }
+
+  if(!isAuthorized) return null;
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -115,7 +105,9 @@ export default function ClientSettingsPage() {
       transition={{ duration: 0.3 }}
       className="space-y-6"
     >
-      <Card>
+      {/* <h1 className="text-3xl font-bold">Settings</h1> */}
+
+      <Card className="shadow-lg">
         <CardHeader>
           <CardTitle>Update Your Info</CardTitle>
         </CardHeader>
@@ -128,9 +120,9 @@ export default function ClientSettingsPage() {
                   name="username"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>User Name</FormLabel>
+                      <FormLabel>Username</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="Enter your user name" />
+                        <Input {...field} placeholder="Enter your username" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -150,10 +142,35 @@ export default function ClientSettingsPage() {
                   )}
                 />
               </div>
-              <Button
-                type="button"
-                onClick={profileForm.handleSubmit(onProfileSubmit)}
-              >
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={profileForm.control}
+                  name="address"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Address</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="Enter your address" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={profileForm.control}
+                  name="phone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Phone Number</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="Enter your phone number" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <Button type="button" onClick={profileForm.handleSubmit(onProfileSubmit)}>
                 Update Info
               </Button>
             </form>
@@ -161,7 +178,7 @@ export default function ClientSettingsPage() {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="shadow-lg">
         <CardHeader>
           <CardTitle>Update Your Email</CardTitle>
         </CardHeader>
@@ -175,22 +192,13 @@ export default function ClientSettingsPage() {
                   <FormItem>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input
-                        {...field}
-                        type="email"
-                        disabled={showOtpSection}
-                        placeholder="Enter your email"
-                      />
+                      <Input {...field} type="email" disabled={showOtpSection} placeholder="Enter your email" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <Button
-                type="button"
-                onClick={emailForm.handleSubmit(onEmailSubmit)}
-                disabled={showOtpSection}
-              >
+              <Button type="button" onClick={emailForm.handleSubmit(onEmailSubmit)} disabled={showOtpSection}>
                 Update Email
               </Button>
             </form>
@@ -203,21 +211,13 @@ export default function ClientSettingsPage() {
                     <FormItem>
                       <FormLabel>OTP</FormLabel>
                       <FormControl>
-                        <Input
-                          {...field}
-                          type="text"
-                          maxLength={6}
-                          placeholder="Enter OTP"
-                        />
+                        <Input {...field} type="text" maxLength={6} placeholder="Enter OTP" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                <Button
-                  className="mt-4 w-full"
-                  onClick={emailForm.handleSubmit(onOtpSubmit)}
-                >
+                <Button className="mt-4 w-full" onClick={emailForm.handleSubmit(onOtpSubmit)}>
                   Verify Your Email
                 </Button>
               </>
