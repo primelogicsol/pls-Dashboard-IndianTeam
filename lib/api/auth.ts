@@ -9,6 +9,7 @@ export const registerUser = async (userData: {
   fullName: string;
   email: string;
   password: string;
+  country: string;
 }) => {
   try {
     const response = await axios.post(

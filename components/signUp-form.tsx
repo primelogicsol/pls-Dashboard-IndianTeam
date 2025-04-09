@@ -19,12 +19,13 @@ export function SignupForm({
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [country, setCountry] = useState("");
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await registerUser({ username, fullName, email, password });
+      const response = await registerUser({ username, fullName, email, password, country });
       console.log("Signup successful:", response);
       router.push("/verify-otp"); // Redirect on success
     } catch (error) {
@@ -48,8 +49,8 @@ export function SignupForm({
                   Sign up for your PLS account
                 </p>
               </div>
-              <div className="grid gap-2 text-white">
-                <Label htmlFor="username">Username</Label>
+              <div className="grid gap-2 ">
+                <Label className="text-white" htmlFor="username">Username</Label>
                 <Input
                   id="username"
                   type="text"
@@ -59,8 +60,8 @@ export function SignupForm({
                   onChange={(e) => setUsername(e.target.value)}
                 />
               </div>
-              <div className="grid gap-2 text-white">
-                <Label htmlFor="fullName">Full Name</Label>
+              <div className="grid gap-2 ">
+                <Label className="text-white" htmlFor="fullName">Full Name</Label>
                 <Input
                   id="fullName"
                   type="text"
@@ -70,8 +71,8 @@ export function SignupForm({
                   onChange={(e) => setFullName(e.target.value)}
                 />
               </div>
-              <div className="grid gap-2 text-white">
-                <Label htmlFor="email">Email</Label>
+              <div className="grid gap-2 ">
+                <Label  className="text-white" htmlFor="email">Email</Label>
                 <Input
                   id="email"
                   type="email"
@@ -81,8 +82,8 @@ export function SignupForm({
                   onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
-              <div className="grid gap-2 text-white">
-                <Label htmlFor="password">Password</Label>
+              <div className="grid gap-2 ">
+                <Label htmlFor="password" className="text-white">Password</Label>
                 <Input
                   id="password"
                   type="password"
@@ -90,6 +91,17 @@ export function SignupForm({
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
+              <div className="grid gap-2 ">
+                <Label htmlFor="country" className="text-white">Country</Label>
+                <Input
+                  id="country"
+                  type="text"
+                  placeholder="Enter your Country"
+                  required
+                  value={country}
+                  onChange={(e) => setCountry(e.target.value)}
                 />
               </div>
               <Button type="submit" className="w-full bg-[#FF6B35] text-white">
