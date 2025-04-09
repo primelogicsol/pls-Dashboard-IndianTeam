@@ -46,7 +46,7 @@ export default function ClientSettingsPage() {
 
   const profileForm = useForm<z.infer<typeof profileFormSchema>>({
     resolver: zodResolver(profileFormSchema),
-    defaultValues: { username: "", fullName: "" },
+    defaultValues: { username: "", fullName: "", address: "", phone: "" },
   });
 
   const emailForm = useForm<z.infer<typeof emailFormSchema>>({

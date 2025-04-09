@@ -18,8 +18,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-
-import { getUserDetails } from "@/lib/api/storage";
 import {
   sendOtp,
   sendOtpForVerifyingUser,
@@ -32,6 +30,8 @@ import { useAuth } from "@/hooks/useAuth";
 const profileFormSchema = z.object({
   username: z.string().min(4, { message: "Username must be at least 4 characters." }),
   fullName: z.string().min(4, { message: "Full Name must be at least 4 characters." }),
+  address: z.string().min(4, { message: "Full Name must be at least 4 characters." }),
+  phone: z.string().min(10, { message: "Phone Number must be at least 10 digits." }),
 });
 
 const emailFormSchema = z.object({
@@ -39,14 +39,14 @@ const emailFormSchema = z.object({
   otp: z.string().optional(),
 });
 
-export default function ModeratorSettingsPage() {
+export default function AdministratorSettingsPage() {
   const [showOtpSection, setShowOtpSection] = useState(false);
   const [email, setEmail] = useState("");
-  const { isAuthorized } = useAuth(["ADMIN", "MODERATOR"]);
+  const { isAuthorized } = useAuth(["MODERATOR", "ADMIN"]);
 
   const profileForm = useForm<z.infer<typeof profileFormSchema>>({
     resolver: zodResolver(profileFormSchema),
-    defaultValues: { username: "", fullName: "" },
+    defaultValues: { username: "", fullName: "", address: "", phone: "" },
   });
 
   const emailForm = useForm<z.infer<typeof emailFormSchema>>({
@@ -54,9 +54,9 @@ export default function ModeratorSettingsPage() {
     defaultValues: { email: "", otp: "" },
   });
 
-  async function onProfileSubmit(data: { username: string; fullName: string }) {
+  async function onProfileSubmit(data: { username: string; fullName: string, address: string, phone: string }) {
     try {
-      await updateUserInfo(data.username, data.fullName);
+      await updateUserInfo(data.username, data.fullName, data.address, data.phone);
       toast.success("Profile updated successfully!");
     } catch (error: any) {
       profileForm.setError("username", {
@@ -105,8 +105,9 @@ export default function ModeratorSettingsPage() {
       transition={{ duration: 0.3 }}
       className="space-y-6"
     >
-    
-      <Card>
+      {/* <h1 className="text-3xl font-bold">Settings</h1> */}
+
+      <Card className="shadow-lg">
         <CardHeader>
           <CardTitle>Update Your Info</CardTitle>
         </CardHeader>
@@ -141,6 +142,34 @@ export default function ModeratorSettingsPage() {
                   )}
                 />
               </div>
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={profileForm.control}
+                  name="address"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Address</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="Enter your address" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={profileForm.control}
+                  name="phone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Phone Number</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="Enter your phone number" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
               <Button type="button" onClick={profileForm.handleSubmit(onProfileSubmit)}>
                 Update Info
               </Button>
@@ -149,7 +178,7 @@ export default function ModeratorSettingsPage() {
         </CardContent>
       </Card>
 
-      <Card >
+      <Card className="shadow-lg">
         <CardHeader>
           <CardTitle>Update Your Email</CardTitle>
         </CardHeader>
