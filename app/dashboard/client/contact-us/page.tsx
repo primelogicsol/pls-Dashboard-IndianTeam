@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -13,6 +13,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { createMessage } from "@/lib/api/contact";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
+import { getCurrentUserDetails } from "@/lib/api/auth";
+import { setUserDetails } from "@/lib/api/storage";
 
 // Zod schema for validation
 const formSchema = z.object({
@@ -28,6 +30,9 @@ export default function ContactForm() {
 
   // State hooks (placed together)
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
 
   // Form hook (after state hooks)
   const form = useForm<z.infer<typeof formSchema>>({
@@ -40,6 +45,30 @@ export default function ContactForm() {
     },
   });
 
+  useEffect(() => {
+    getUserDetails();
+  }, [])
+
+  const getUserDetails = async () => {
+    try {
+      const userDetails = await getCurrentUserDetails();
+      if (userDetails) {
+        const fullName = userDetails.data.fullName || "";
+        const [firstName = "", lastName = ""] = fullName.split(" ");
+        const email = userDetails.data.email || "";
+
+        form.reset({
+          firstName,
+          lastName,
+          email,
+          message: "", // Leave message empty
+        });
+      }
+    } catch (error) {
+      console.error("Failed to load user details:", error);
+    }
+  };
+  
   async function onSubmit(values: any) {
     setIsSubmitting(true);
     try {
@@ -65,7 +94,7 @@ export default function ContactForm() {
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            {(["first name", "last name", "email", "message"] as const).map((fieldName) => (
+            {(["firstName", "lastName", "email", "message"] as const).map((fieldName) => (
               <FormField
                 key={fieldName}
                 control={form.control}

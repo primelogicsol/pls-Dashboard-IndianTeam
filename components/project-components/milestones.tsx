@@ -51,6 +51,7 @@ interface MilestonesTimelineProps {
   milestones: Milestone[];
   slug: string;
   projectId?: number;
+  projectDeadline?: Date | string;
   onMilestoneChange: () => void;
 }
 
@@ -58,6 +59,7 @@ export default function MilestonesTimeline({
   milestones,
   slug,
   projectId,
+  projectDeadline,
   onMilestoneChange,
 }: MilestonesTimelineProps) {
   const milestonesArray = Array.isArray(milestones) ? milestones : [];
@@ -69,12 +71,27 @@ export default function MilestonesTimeline({
   );
   const [progress, setProgress] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
+  const [minDateTime, setMinDateTime] = useState("");
+  const [maxDateTime, setMaxDateTime] = useState("");
 
   useEffect(() => {
     const userDetails = getUserDetails();
     const role = userDetails?.role || "";
     setUserRole(role);
+
+    const now = new Date();
+    const deadline = projectDeadline ? new Date(projectDeadline) : new Date(); // Use current date as fallback
+
+    setMinDateTime(formatDateTimeLocal(now.toISOString()));
+    setMaxDateTime(formatDateTimeLocal(deadline.toISOString()));
   }, []);
+
+  const formatDateTimeLocal = (utcDateString: string) => {
+    const date = new Date(utcDateString); // parse the UTC date
+    const pad = (n: number) => n.toString().padStart(2, "0");
+  
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+  };
 
   // ✅ Initialize React Hook Form with Zod
   const {
@@ -220,7 +237,6 @@ export default function MilestonesTimeline({
                           {milestone.description}
                         </p>
                         <div className="flex justify-start">
-                          
                           <Badge
                             className={`${
                               milestone.isMilestoneCompleted
@@ -366,7 +382,12 @@ export default function MilestonesTimeline({
 
             <div>
               <Label htmlFor="deadline">Deadline</Label>
-              <Input type="datetime-local" {...register("deadline")} />
+              <Input
+                type="datetime-local"
+                min={minDateTime}
+                max={maxDateTime}
+                {...register("deadline")}
+              />
               {errors.deadline && (
                 <p className="text-red-500 text-sm">
                   {errors.deadline.message}

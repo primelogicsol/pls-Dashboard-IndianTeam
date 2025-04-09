@@ -88,6 +88,7 @@ export default function ProjectDetailsPage() {
             milestones={project.milestones}
             slug={slug}
             projectId={project.id}
+            projectDeadline={project.deadline}
             onMilestoneChange={refreshMilestones}
           />
         )}
