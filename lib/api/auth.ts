@@ -138,7 +138,7 @@ export async function updatePassword(newPassword: string, uid: string) {
   }
 }
 
-export async function updateUserInfo(username: string, fullName: string) {
+export async function updateUserInfo(username: string, fullName: string, address: string, phone: string) {
   try {
     const userDetails = getUserDetails();
     const uid = userDetails?.uid;
@@ -150,7 +150,7 @@ export async function updateUserInfo(username: string, fullName: string) {
 
     const response = await authInstance.patch(
       "/updateInfo",
-      { username, fullName, uid }, // Send as request body
+      { username, fullName, uid, address, phone }, // Send as request body
       {
         headers: {
           Authorization: `Bearer ${accessToken}`, // Include access token

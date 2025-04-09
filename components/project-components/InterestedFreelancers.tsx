@@ -254,6 +254,9 @@ export default function InterestedFreelancersForProject({
                                   <strong>Phone Number:</strong> {freelancer.phone}
                                 </p>
                                 <p>
+                                  <strong>Address:</strong> {freelancer.address}
+                                </p>
+                                <p>
                                   <strong>Rank:</strong> {freelancer.kpiRank}
                                 </p>
                                 <p>
