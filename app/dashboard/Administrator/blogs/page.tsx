@@ -32,7 +32,7 @@ export interface Blog {
   blogOverview: string;
   blogBody?: string;
   isPublished: boolean;
-  isPublic: boolean; // Added for public/private visibility
+  isPublished: boolean; // Added for public/private visibility
   createdAt: string;
 }
 
@@ -147,13 +147,13 @@ export default function BlogsPage() {
   // Handle visibility toggle
   const handleVisibilityToggle = async (blog: Blog) => {
     try {
-      const newVisibility = !blog.isPublic;
+      const newVisibility = !blog.isPublished;
       await updateBlogVisibility(blog.blogSlug, newVisibility);
 
       // Update local state after successful update
       if (blogsData) {
         const updatedBlogs = blogsData.data.blogs.map((b) =>
-          b.blogId === blog.blogId ? { ...b, isPublic: newVisibility } : b
+          b.blogId === blog.blogId ? { ...b, isPublished: newVisibility } : b
         );
 
         setBlogsData({
