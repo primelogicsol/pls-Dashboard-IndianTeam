@@ -13,7 +13,9 @@ import PLSLogo from "@/assets/pls_logo.jpg";
 import { login } from "@/lib/api/auth"; // Import login function
 import { setUserDetails } from "@/lib/api/storage"; // Store user in cookies
 import { UserRole } from "@/lib/api/userDetailsEnum"; // User role enum
+import { LoaderCircle } from "lucide-react";
 import Link from "next/link";
+import { toast } from "sonner";
 
 export function LoginForm({
   className,
@@ -22,11 +24,13 @@ export function LoginForm({
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setIsLoading(true);
 
     if (!username || !password) {
       setError("Please fill in all fields");
@@ -55,15 +59,17 @@ export function LoginForm({
           default:
             router.push("/");
         }
-      } else {
-        setError("Invalid username or password");
       }
+      setIsLoading(false);
     } catch (error: any) {
       const errorMessage =
-        error?.message ||
         error?.response?.data?.message ||
-        "Failed to trash the consultation request";
+        error?.message ||
+        "Please try again later";
       setError(errorMessage);
+      toast.error(errorMessage);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -71,7 +77,10 @@ export function LoginForm({
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card className="overflow-hidden">
         <CardContent className="grid p-0 md:grid-cols-2 ">
-          <div className="relative hidden bg-[#003087] border-r-2 md:block" style={{borderRight: "2px solid orange"}}>
+          <div
+            className="relative hidden bg-[#003087] border-r-2 md:block"
+            style={{ borderRight: "2px solid orange" }}
+          >
             <Image
               src={PLSLogo}
               className="absolute p-8 inset-0 h-full w-full object-cover"
@@ -93,7 +102,9 @@ export function LoginForm({
                 </div>
                 {error && <p className="text-red-500 text-center">{error}</p>}
                 <div className="grid gap-2">
-                  <Label htmlFor="username" className="text-white">Username</Label>
+                  <Label htmlFor="username" className="text-white">
+                    Username
+                  </Label>
                   <Input
                     id="username"
                     type="text"
@@ -125,9 +136,19 @@ export function LoginForm({
                     onChange={(e) => setPassword(e.target.value)}
                   />
                 </div>
-                <Button type="submit" className="w-full bg-[#FF6B35]">
-                  Login
-                </Button>
+                {isLoading ? (
+                  <Button className="w-full bg-[#FF6B35] text-white" disabled>
+                    <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />{" "}
+                    Signing in
+                  </Button>
+                ) : (
+                  <Button
+                    type="submit"
+                    className="w-full bg-[#FF6B35] text-white"
+                  >
+                    Sign In
+                  </Button>
+                )}
                 <div className="text-center text-white text-sm">
                   Don&apos;t have an account?{" "}
                   <a
@@ -147,8 +168,15 @@ export function LoginForm({
         </CardContent>
       </Card>
       <div className="text-center text-xs text-muted-foreground [&_a]:underline [&_a]:underline-offset-4 hover:[&_a]:text-primary">
-        By clicking continue, you agree to our <Link href="#" className="hover:text-[#003087]">Terms of Service</Link>{" "}
-        and <a href="#" className="hover:text-[#003087]">Privacy Policy</a>.
+        By clicking continue, you agree to our{" "}
+        <Link href="#" className="hover:text-[#003087]">
+          Terms of Service
+        </Link>{" "}
+        and{" "}
+        <a href="#" className="hover:text-[#003087]">
+          Privacy Policy
+        </a>
+        .
       </div>
     </div>
   );
