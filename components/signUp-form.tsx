@@ -7,9 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import SignUpImg from "@/assets/pls_logo.jpg"
+import SignUpImg from "@/assets/pls_logo.jpg";
 import Image from "next/image";
 import { registerUser } from "@/lib/api/auth";
+import { toast } from "sonner";
+import axios from "axios";
 
 export function SignupForm({
   className,
@@ -25,14 +27,37 @@ export function SignupForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await registerUser({ username, fullName, email, password, country });
-      console.log("Signup successful:", response);
-      router.push("/verify-otp"); // Redirect on success
+      const response = await registerUser({
+        username,
+        fullName,
+        email,
+        password,
+        country,
+      });
+      toast.success(
+        "Registration successful! Please check your email for the OTP."
+      );
+      router.push("/verify-otp");
     } catch (error) {
-      if (error instanceof Error) {
-        console.error("Signup error:", error.message);
+      // if (axios.isAxiosError(error) && error.response) {
+      //   const errorMessage = (error.response.data as any)?.message || "Something went wrong";
+      //   console.error("Signup error:", errorMessage);
+      //   toast.error(errorMessage);
+      // } else {
+      //   console.error("Signup error:", error);
+      //   toast.error("An unexpected error occurred.");
+      // }
+      if (axios.isAxiosError(error) && error.response) {
+        const apiError = error.response.data as { message: string };
+        console.error("Signup error:", apiError.message);
+        toast.error(apiError.message || "Something went wrong");
+      } else if ((error as any)?.message) {
+        // if you manually threw the error object in registerUser
+        console.error("Signup error:", (error as any).message);
+        toast.error((error as any).message);
       } else {
         console.error("Signup error:", error);
+        toast.error("An unexpected error occurred.");
       }
     }
   };
@@ -41,16 +66,24 @@ export function SignupForm({
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card className="overflow-hidden">
         <CardContent className="grid p-0 md:grid-cols-2 bg-[#003087]">
-          <form className="p-6 md:p-8 border-r-2" style={{borderRight: "2px solid orange"}} onSubmit={handleSubmit}>
+          <form
+            className="p-6 md:p-8 border-r-2"
+            style={{ borderRight: "2px solid orange" }}
+            onSubmit={handleSubmit}
+          >
             <div className="flex flex-col gap-6">
               <div className="flex flex-col items-center text-center">
-                <h1 className="text-2xl text-white font-bold">Create an account</h1>
+                <h1 className="text-2xl text-white font-bold">
+                  Create an account
+                </h1>
                 <p className="text-balance text-white">
                   Sign up for your PLS account
                 </p>
               </div>
               <div className="grid gap-2 ">
-                <Label className="text-white" htmlFor="username">Username</Label>
+                <Label className="text-white" htmlFor="username">
+                  Username
+                </Label>
                 <Input
                   id="username"
                   type="text"
@@ -61,7 +94,9 @@ export function SignupForm({
                 />
               </div>
               <div className="grid gap-2 ">
-                <Label className="text-white" htmlFor="fullName">Full Name</Label>
+                <Label className="text-white" htmlFor="fullName">
+                  Full Name
+                </Label>
                 <Input
                   id="fullName"
                   type="text"
@@ -72,7 +107,9 @@ export function SignupForm({
                 />
               </div>
               <div className="grid gap-2 ">
-                <Label  className="text-white" htmlFor="email">Email</Label>
+                <Label className="text-white" htmlFor="email">
+                  Email
+                </Label>
                 <Input
                   id="email"
                   type="email"
@@ -83,7 +120,9 @@ export function SignupForm({
                 />
               </div>
               <div className="grid gap-2 ">
-                <Label htmlFor="password" className="text-white">Password</Label>
+                <Label htmlFor="password" className="text-white">
+                  Password
+                </Label>
                 <Input
                   id="password"
                   type="password"
@@ -94,7 +133,9 @@ export function SignupForm({
                 />
               </div>
               <div className="grid gap-2 ">
-                <Label htmlFor="country" className="text-white">Country</Label>
+                <Label htmlFor="country" className="text-white">
+                  Country
+                </Label>
                 <Input
                   id="country"
                   type="text"
