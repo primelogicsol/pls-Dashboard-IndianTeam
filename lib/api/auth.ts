@@ -12,10 +12,7 @@ export const registerUser = async (userData: {
   country: string;
 }) => {
   try {
-    const response = await axios.post(
-      `${process.env.NEXT_PUBLIC_PLS_AUTH}/register`,
-      userData
-    );
+    const response = await authInstance.post("/register", userData);
 
     if (response.data.success) {
       // Store the received data in localStorage
@@ -24,10 +21,11 @@ export const registerUser = async (userData: {
 
     return response.data;
   } catch (error) {
+    console.error("Registration failed:", error);
     if (axios.isAxiosError(error) && error.response) {
       throw error.response.data;
     } else {
-      throw { message: "Something went wrong" };
+      throw { message: "Registration failed" };
     }
   }
 };
@@ -35,26 +33,23 @@ export const registerUser = async (userData: {
 export const verifyOtp = async (
   email: string,
   otp: string,
-  accessToken: string
 ) => {
   try {
-    const response = await axios.post(
-      `${process.env.NEXT_PUBLIC_PLS_AUTH}/verifyEmail`,
-      { email, OTP: otp }, // Payload (Body)
-      {
-        headers: { Authorization: `Bearer ${accessToken}` }, // Headers
-      }
-    );
-
+    const response = await authInstance.post("/verifyEmail", {
+      email,
+      OTP: otp,
+    });
     return response.data;
   } catch (error) {
+    console.error("OTP Verification failed:", error);
     if (axios.isAxiosError(error) && error.response) {
       throw error.response.data;
     } else {
-      throw { message: "OTP verification failed" };
+      throw { message: "OTP Verification failed" };
     }
   }
 };
+
 export const login = async (username: string, password: string) => {
   try {
     const response = await authInstance.post("/login", { username, password });
@@ -82,7 +77,11 @@ export const login = async (username: string, password: string) => {
     }
   } catch (error) {
     console.error("Login failed:", error);
-    throw new Error("Login failed. Please try again.");
+    if (axios.isAxiosError(error) && error.response) {
+      throw error.response.data;
+    } else {
+      throw { message: "Login failed" };
+    }
   }
 };
 
@@ -138,7 +137,12 @@ export async function updatePassword(newPassword: string, uid: string) {
   }
 }
 
-export async function updateUserInfo(username: string, fullName: string, address: string, phone: string) {
+export async function updateUserInfo(
+  username: string,
+  fullName: string,
+  address: string,
+  phone: string
+) {
   try {
     const userDetails = getUserDetails();
     const uid = userDetails?.uid;

@@ -11,7 +11,7 @@ import SignUpImg from "@/assets/pls_logo.jpg";
 import Image from "next/image";
 import { registerUser } from "@/lib/api/auth";
 import { toast } from "sonner";
-import axios from "axios";
+import { LoaderCircle } from "lucide-react";
 
 export function SignupForm({
   className,
@@ -22,10 +22,13 @@ export function SignupForm({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [country, setCountry] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
     try {
       const response = await registerUser({
         username,
@@ -38,28 +41,30 @@ export function SignupForm({
         "Registration successful! Please check your email for the OTP."
       );
       router.push("/verify-otp");
-    } catch (error) {
-      // if (axios.isAxiosError(error) && error.response) {
-      //   const errorMessage = (error.response.data as any)?.message || "Something went wrong";
-      //   console.error("Signup error:", errorMessage);
-      //   toast.error(errorMessage);
-      // } else {
-      //   console.error("Signup error:", error);
-      //   toast.error("An unexpected error occurred.");
-      // }
-      if (axios.isAxiosError(error) && error.response) {
-        const apiError = error.response.data as { message: string };
-        console.error("Signup error:", apiError.message);
-        toast.error(apiError.message || "Something went wrong");
-      } else if ((error as any)?.message) {
-        // if you manually threw the error object in registerUser
-        console.error("Signup error:", (error as any).message);
-        toast.error((error as any).message);
-      } else {
-        console.error("Signup error:", error);
-        toast.error("An unexpected error occurred.");
-      }
-    }
+      setIsLoading(false);
+    } 
+    // catch (error) {
+    //   if (axios.isAxiosError(error) && error.response) {
+    //     const apiError = error.response.data as { message: string };
+    //     console.error("Signup error:", apiError.message);
+    //     toast.error(apiError.message || "Something went wrong");
+    //   } else if ((error as any)?.message) {
+    //     console.error("Signup error:", (error as any).message);
+    //     toast.error((error as any).message);
+    //   } else {
+    //     console.error("Signup error:", error);
+    //     toast.error("An unexpected error occurred.");
+    //   }
+    // }
+    catch (error: any) {
+          const errorMessage =
+            error?.response?.data?.message ||
+            error?.message ||
+            "Something went wrong";
+        
+          setError(errorMessage);
+          setIsLoading(false); 
+        }
   };
 
   return (
@@ -80,6 +85,7 @@ export function SignupForm({
                   Sign up for your PLS account
                 </p>
               </div>
+              {error && <p className="text-red-500 text-center">{error}</p>}
               <div className="grid gap-2 ">
                 <Label className="text-white" htmlFor="username">
                   Username
@@ -145,9 +151,19 @@ export function SignupForm({
                   onChange={(e) => setCountry(e.target.value)}
                 />
               </div>
-              <Button type="submit" className="w-full bg-[#FF6B35] text-white">
-                Sign Up
-              </Button>
+              {isLoading ? (
+                <Button className="w-full bg-[#FF6B35] text-white" disabled>
+                  <LoaderCircle className="mr-2 h-4 w-4 animate-spin" /> Signing
+                  Up
+                </Button>
+              ) : (
+                <Button
+                  type="submit"
+                  className="w-full bg-[#FF6B35] text-white"
+                >
+                  Sign Up
+                </Button>
+              )}
               <div className="text-center text-white text-sm">
                 Already have an account?{" "}
                 <a
