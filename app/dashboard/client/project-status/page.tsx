@@ -136,12 +136,7 @@ export default function ClientProjectStatusPage() {
       ) : projects.length === 0 ? (
         <Card className="p-8 text-center">
           <CardContent>
-            <p className="text-xl font-semibold mb-4">No projects found</p>
-            <Button
-              onClick={() => router.push("/dashboard/client/projects/create")}
-            >
-              Create Your First Project
-            </Button>
+            <p className="text-xl font-semibold mb-4">You have not been assigned any projects.</p>
           </CardContent>
         </Card>
       ) : (
