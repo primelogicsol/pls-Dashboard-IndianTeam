@@ -174,6 +174,8 @@ export default function Page() {
           {selectedUser && (
             <div className="space-y-2">
               <p><strong>Username:</strong> {selectedUser.username}</p>
+              <p><strong>Unique Id:</strong> {selectedUser.uid}</p>
+
               <p><strong>Full Name:</strong> {selectedUser.fullName}</p>
               <p><strong>Email:</strong> {selectedUser.email}</p>
               <p><strong>Role:</strong> {selectedUser.role}</p>
