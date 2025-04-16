@@ -68,11 +68,18 @@ export default function FreelancerRequests() {
   const fetchFreelancerRequests = async () => {
     try {
       const response = await getAllFreelancersRequest();
-      setRequests(response.data);
+      if (response?.data && Array.isArray(response.data)) {
+        setRequests(response.data);
+      } else {
+        setRequests([]); 
+      }
     } catch (error) {
       console.error("Error fetching requests:", error);
+      setRequests([]); 
     }
   };
+    // 🔒 Guard against `null`
+    if (!requests) return <div>Loading or failed to fetch requests.</div>;
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
@@ -114,7 +121,7 @@ export default function FreelancerRequests() {
     setLoading((prev) => ({ ...prev, [id]: undefined }));
   };
 
-  const filteredRequests = requests.filter(
+  const filteredRequests = (requests || []).filter(
     (request) =>
       request.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       request.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
