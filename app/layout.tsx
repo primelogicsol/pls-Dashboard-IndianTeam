@@ -8,7 +8,7 @@ import { Toaster } from "sonner";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Freelancer Platform",
+  title: "Prime Logic Solutions",
   description: "A platform for freelancers and clients",
 };
 
@@ -19,6 +19,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+      <link rel="icon" href="/favicon.ico" />
+      </head>
       <body className={inter.className}>
         <MobileRestriction>{children}</MobileRestriction>
         <Toaster />

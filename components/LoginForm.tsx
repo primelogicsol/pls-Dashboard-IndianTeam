@@ -78,8 +78,9 @@ export function LoginForm({
       <Card className="overflow-hidden">
         <CardContent className="grid p-0 md:grid-cols-2 ">
           <div
-            className="relative hidden bg-[#003087] border-r-2 md:block"
+            className="relative hidden bg-[#003087] border-r-2 md:block hover:cursor-pointer"
             style={{ borderRight: "2px solid orange" }}
+            onClick={() => router.push("https://primelogicsol.com")}
           >
             <Image
               src={PLSLogo}
