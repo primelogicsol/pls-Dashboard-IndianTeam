@@ -71,15 +71,15 @@ export default function FreelancerRequests() {
       if (response?.data && Array.isArray(response.data)) {
         setRequests(response.data);
       } else {
-        setRequests([]); 
+        setRequests([]);
       }
     } catch (error) {
       console.error("Error fetching requests:", error);
-      setRequests([]); 
+      setRequests([]);
     }
   };
-    // 🔒 Guard against `null`
-    if (!requests) return <div>Loading or failed to fetch requests.</div>;
+  // 🔒 Guard against `null`
+  if (!requests) return <div>Loading or failed to fetch requests.</div>;
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
@@ -147,7 +147,7 @@ export default function FreelancerRequests() {
           value={searchTerm}
           onChange={handleSearch}
         /> */}
-         <div className="relative flex-1">
+        <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
           <Input
             placeholder="Search freelancers..."
@@ -179,121 +179,135 @@ export default function FreelancerRequests() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {currentEntries.map((request) => (
-            <TableRow key={request.id}>
-              <TableCell>{request.name}</TableCell>
-              <TableCell>{request.email}</TableCell>
-              <TableCell>{request.phone}</TableCell>
-              <TableCell>{request.niche}</TableCell>
-              <TableCell className="space-x-2">
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setSelectedRequest(request)}
-                    >
-                      View Details
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-lg">
-                    <DialogHeader>
-                      <DialogTitle>Request Details</DialogTitle>
-                    </DialogHeader>
-                    {selectedRequest && (
-                      <div className="space-y-2">
-                        <p>
-                          <strong>Name:</strong> {selectedRequest.name}
-                        </p>
-                        <p>
-                          <strong>Email:</strong> {selectedRequest.email}
-                        </p>
-                        <p>
-                          <strong>Phone:</strong> {selectedRequest.phone}
-                        </p>
-                        <p>
-                          <strong>Address:</strong> {selectedRequest.address}
-                        </p>
-                        <p>
-                          <strong>Detail:</strong> {selectedRequest.detail}
-                        </p>
-                        <p>
-                          <strong>Year of Experience:</strong> {selectedRequest.yearOfExperience? selectedRequest.yearOfExperience: "N/A"}
-                        </p>
-                        <p>
-                          <strong>Country:</strong> {selectedRequest.country? selectedRequest.country: "N/A"}
-                        </p>
-                        <p>
-                          <strong>Portfolio:</strong>{" "}
-                          <a
-                            href={selectedRequest.yourPortfolio}
-                            className="text-blue-500"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            {selectedRequest.yourPortfolio}
-                          </a>
-                        </p>
-                        <p>
-                          <strong>Projects:</strong>
-                        </p>
-                        <ul className="list-disc ml-6">
-                          <li>
+          {currentEntries.length > 0 ? (
+            currentEntries.map((request) => (
+              <TableRow key={request.id}>
+                <TableCell>{request.name}</TableCell>
+                <TableCell>{request.email}</TableCell>
+                <TableCell>{request.phone}</TableCell>
+                <TableCell>{request.niche}</TableCell>
+                <TableCell className="space-x-2">
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setSelectedRequest(request)}
+                      >
+                        View Details
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-lg">
+                      <DialogHeader>
+                        <DialogTitle>Request Details</DialogTitle>
+                      </DialogHeader>
+                      {selectedRequest && (
+                        <div className="space-y-2">
+                          <p>
+                            <strong>Name:</strong> {selectedRequest.name}
+                          </p>
+                          <p>
+                            <strong>Email:</strong> {selectedRequest.email}
+                          </p>
+                          <p>
+                            <strong>Phone:</strong> {selectedRequest.phone}
+                          </p>
+                          <p>
+                            <strong>Address:</strong> {selectedRequest.address}
+                          </p>
+                          <p>
+                            <strong>Detail:</strong> {selectedRequest.detail}
+                          </p>
+                          <p>
+                            <strong>Year of Experience:</strong>{" "}
+                            {selectedRequest.yearOfExperience
+                              ? selectedRequest.yearOfExperience
+                              : "N/A"}
+                          </p>
+                          <p>
+                            <strong>Country:</strong>{" "}
+                            {selectedRequest.country
+                              ? selectedRequest.country
+                              : "N/A"}
+                          </p>
+                          <p>
+                            <strong>Portfolio:</strong>{" "}
                             <a
-                              href={selectedRequest.yourTopProject1}
+                              href={selectedRequest.yourPortfolio}
                               className="text-blue-500"
                               target="_blank"
                               rel="noopener noreferrer"
                             >
-                              {selectedRequest.yourTopProject1}
+                              {selectedRequest.yourPortfolio}
                             </a>
-                          </li>
-                          <li>
-                            <a
-                              href={selectedRequest.yourTopProject2}
-                              className="text-blue-500"
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              {selectedRequest.yourTopProject2}
-                            </a>
-                          </li>
-                          <li>
-                            <a
-                              href={selectedRequest.yourTopProject3}
-                              className="text-blue-500"
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              {selectedRequest.yourTopProject3}
-                            </a>
-                          </li>
-                        </ul>
+                          </p>
+                          <p>
+                            <strong>Projects:</strong>
+                          </p>
+                          <ul className="list-disc ml-6">
+                            <li>
+                              <a
+                                href={selectedRequest.yourTopProject1}
+                                className="text-blue-500"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                {selectedRequest.yourTopProject1}
+                              </a>
+                            </li>
+                            <li>
+                              <a
+                                href={selectedRequest.yourTopProject2}
+                                className="text-blue-500"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                {selectedRequest.yourTopProject2}
+                              </a>
+                            </li>
+                            <li>
+                              <a
+                                href={selectedRequest.yourTopProject3}
+                                className="text-blue-500"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                {selectedRequest.yourTopProject3}
+                              </a>
+                            </li>
+                          </ul>
 
-                        <Button
-                          variant="default"
-                          size="sm"
-                          className="mt-4"
-                          onClick={() => acceptFreelancer(selectedRequest.id)}
-                          disabled={!!loading[selectedRequest.id]}
-                        >
-                          {loading[selectedRequest.id] || "Accept Freelancer"}
-                        </Button>
-                      </div>
-                    )}
-                  </DialogContent>
-                </Dialog>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => handleTrash(request.id)}
-                  disabled={!!loading[request.id]}
-                >
-                  {loading[request.id] || "Trash"}
-                </Button>
+                          <Button
+                            variant="default"
+                            size="sm"
+                            className="mt-4"
+                            onClick={() => acceptFreelancer(selectedRequest.id)}
+                            disabled={!!loading[selectedRequest.id]}
+                          >
+                            {loading[selectedRequest.id] || "Accept Freelancer"}
+                          </Button>
+                        </div>
+                      )}
+                    </DialogContent>
+                  </Dialog>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => handleTrash(request.id)}
+                    disabled={!!loading[request.id]}
+                  >
+                    {loading[request.id] || "Trash"}
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell colSpan={5} className="text-center text-gray-500">
+                No requests found.
               </TableCell>
             </TableRow>
-          ))}
+          )}
         </TableBody>
       </Table>
 
