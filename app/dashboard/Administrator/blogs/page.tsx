@@ -151,7 +151,7 @@ export default function BlogsPage() {
       // Update local state after successful update
       if (blogsData) {
         const updatedBlogs = blogsData.data.blogs.map((b) =>
-          b.blogId === blog.blogId ? { ...b, isPublic: newVisibility } : b
+          b.blogId === blog.blogId ? { ...b, isPublished: newVisibility } : b
         );
 
         setBlogsData({
