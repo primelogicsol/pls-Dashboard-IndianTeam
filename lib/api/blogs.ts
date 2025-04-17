@@ -41,7 +41,7 @@ export async function getASingleBlog(blogSlug:string) {
 // get All Public blogs
 export async function getAllPublicBlogs(currentPage: number, limit: number) {
   try {
-    const response = await apiInstance.get("/blog/getAllPublicBlogs");
+    const response = await apiInstance.get(`/blog/getAllPublicBlogs/?page=${currentPage}?limit=${limit}`)
     if(response.status === 200) {
       return response.data;
     }

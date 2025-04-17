@@ -32,7 +32,6 @@ export interface Blog {
   blogOverview: string;
   blogBody?: string;
   isPublished: boolean;
-  isPublic: boolean; // Added for public/private visibility
   createdAt: string;
 }
 
@@ -89,13 +88,11 @@ export default function BlogsPage() {
     const fetchBlogs = async () => {
       setLoading(true);
       try {
-        // In a real application, this would call the actual API
-        // For now, we'll simulate the API response with the provided data
         const response = await getAllPublicBlogs(currentPage, limit);
         setBlogsData(response);
       } catch (error) {
         console.error("Error fetching blogs:", error);
-        toast.error("failed to load blogs");
+        toast.error("Failed to load blogs");
       } finally {
         setLoading(false);
       }
@@ -103,6 +100,7 @@ export default function BlogsPage() {
 
     fetchBlogs();
   }, [currentPage, limit, debouncedSearchQuery]);
+
 
    // Conditional rendering happens after all hooks have been called
    if (loading) return <p>Loading...</p>;
@@ -147,7 +145,7 @@ export default function BlogsPage() {
   // Handle visibility toggle
   const handleVisibilityToggle = async (blog: Blog) => {
     try {
-      const newVisibility = !blog.isPublic;
+      const newVisibility = !blog.isPublished;
       await updateBlogVisibility(blog.blogSlug, newVisibility);
 
       // Update local state after successful update
@@ -176,9 +174,7 @@ export default function BlogsPage() {
   const handlePageChange = (page: number) => {
     router.push(
       `?page=${page}&limit=${limit}${
-        debouncedSearchQuery
-          ? `&search=${encodeURIComponent(debouncedSearchQuery)}`
-          : ""
+        debouncedSearchQuery ? `&search=${encodeURIComponent(debouncedSearchQuery)}` : ""
       }`
     );
   };
@@ -242,30 +238,9 @@ export default function BlogsPage() {
         </div>
       )}
 
-      {/* Pagination */}
-      {!loading && blogsData && blogsData.data.pagination.totalPages > 1 && (
+{!loading && blogsData && blogsData.data.pagination.totalPages > 1 && (
         <Pagination className="mt-8">
           <PaginationContent>
-            {/* {blogsData.data.pagination.hasPreviousPage && (
-              <PaginationItem>
-                <PaginationPrevious
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault()
-                    handlePageChange(currentPage - 1)
-                  }}
-                />
-              </PaginationItem>
-            )} */}
-            {blogsData.data.blogs.map((blog) => (
-              <BlogCard
-                key={blog.blogId}
-                blog={blog}
-                onDelete={() => handleDeleteBlog(blog.blogSlug, blog.blogId)}
-                onToggleVisibility={handleVisibilityToggle}
-              />
-            ))}
-
             {/* First page */}
             {currentPage > 2 && (
               <PaginationItem>
@@ -284,13 +259,11 @@ export default function BlogsPage() {
             {/* Ellipsis if needed */}
             {currentPage > 3 && (
               <PaginationItem>
-                <span className="flex h-9 w-9 items-center justify-center">
-                  ...
-                </span>
+                <span className="flex h-9 w-9 items-center justify-center">...</span>
               </PaginationItem>
             )}
 
-            {/* Previous page if not first */}
+            {/* Previous page */}
             {currentPage > 1 && (
               <PaginationItem>
                 <PaginationLink
@@ -307,16 +280,12 @@ export default function BlogsPage() {
 
             {/* Current page */}
             <PaginationItem>
-              <PaginationLink
-                href="#"
-                isActive
-                onClick={(e) => e.preventDefault()}
-              >
+              <PaginationLink href="#" isActive onClick={(e) => e.preventDefault()}>
                 {currentPage}
               </PaginationLink>
             </PaginationItem>
 
-            {/* Next page if not last */}
+            {/* Next page */}
             {currentPage < blogsData.data.pagination.totalPages && (
               <PaginationItem>
                 <PaginationLink
@@ -334,13 +303,11 @@ export default function BlogsPage() {
             {/* Ellipsis if needed */}
             {currentPage < blogsData.data.pagination.totalPages - 2 && (
               <PaginationItem>
-                <span className="flex h-9 w-9 items-center justify-center">
-                  ...
-                </span>
+                <span className="flex h-9 w-9 items-center justify-center">...</span>
               </PaginationItem>
             )}
 
-            {/* Last page if not current or next */}
+            {/* Last page */}
             {currentPage < blogsData.data.pagination.totalPages - 1 && (
               <PaginationItem>
                 <PaginationLink
@@ -352,18 +319,6 @@ export default function BlogsPage() {
                 >
                   {blogsData.data.pagination.totalPages}
                 </PaginationLink>
-              </PaginationItem>
-            )}
-
-            {blogsData.data.pagination.hasNextPage && (
-              <PaginationItem>
-                <PaginationNext
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handlePageChange(currentPage + 1);
-                  }}
-                />
               </PaginationItem>
             )}
           </PaginationContent>
