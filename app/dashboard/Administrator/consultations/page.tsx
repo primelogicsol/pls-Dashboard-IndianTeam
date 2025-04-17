@@ -122,7 +122,7 @@ function ConsultationsPage() {
       <div className="flex items-center justify-center h-screen">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-destructive mb-4">
-            Error Loading Consultations
+            Please raise a consultation request to see the consultations
           </h2>
         </div>
       </div>
