@@ -177,7 +177,7 @@ export default function BlogsPage() {
         debouncedSearchQuery ? `&search=${encodeURIComponent(debouncedSearchQuery)}` : ""
       }`
     );
-  };
+  }; 
 
   return (
     <div className="container mx-auto py-8 px-4">
