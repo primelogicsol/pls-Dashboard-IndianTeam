@@ -30,7 +30,6 @@ export interface Blog {
   blogOverview: string;
   blogBody?: string;
   isPublished: boolean;
-  isPublic: boolean; // Added for public/private visibility
   createdAt: string;
 }
 
@@ -94,7 +93,7 @@ export function BlogCard({
         />
         <div className="absolute top-2 right-2">
           <Badge
-            variant={blog.isPublic ? "default" : "secondary"}
+            variant={blog.isPublished ? "default" : "secondary"}
             className="flex gap-1 items-center"
           >
             {blog.isPublished ? (
@@ -128,7 +127,7 @@ export function BlogCard({
             htmlFor={`visibility-${blog.blogId}`}
             className="text-sm cursor-pointer"
           >
-            {blog.isPublished ? "Public" : "Private"}
+            {blog.isPublished ? "Change to Private" : "Change to Public"}
           </Label>
           <Dialog
             open={showVisibilityDialog}
@@ -137,7 +136,7 @@ export function BlogCard({
             <DialogTrigger asChild>
               <Switch
                 id={`visibility-${blog.blogId}`}
-                checked={blog.isPublic}
+                checked={blog.isPublished}
                 disabled={isUpdatingVisibility}
               />
             </DialogTrigger>
@@ -145,7 +144,7 @@ export function BlogCard({
               <DialogHeader>
                 <DialogTitle>Change Blog Visibility</DialogTitle>
                 <DialogDescription>
-                  {blog.isPublic
+                  {blog.isPublished
                     ? "Making this blog private will hide it from public view. Only you will be able to see it."
                     : "Making this blog public will allow anyone to view it. Are you sure you want to proceed?"}
                 </DialogDescription>
