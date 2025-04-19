@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -12,59 +14,60 @@ import Image from "next/image";
 import { registerUser } from "@/lib/api/auth";
 import { toast } from "sonner";
 import { LoaderCircle } from "lucide-react";
+import { useState } from "react";
+
+const signupSchema = z.object({
+  username: z.string().min(3, "Username is required"),
+  fullName: z.string().min(3, "Full name is required"),
+  email: z.string().email("Invalid email address"),
+  password: z
+  .string()
+  .min(6, "Password must be at least 6 characters long")
+  .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+  .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+  .regex(/[0-9]/, "Password must contain at least one number")
+  .regex(/[^A-Za-z0-9]/, "Password must contain at least one special character"),
+  country: z.string().min(1, "Country is required"),
+});
+
+type SignupFormData = z.infer<typeof signupSchema>;
 
 export function SignupForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-  const [username, setUsername] = useState("");
-  const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [country, setCountry] = useState("");
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<SignupFormData>({
+    resolver: zodResolver(signupSchema),
+  });
+
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [serverError, setServerError] = useState<string | null>(null);
   const router = useRouter();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = async (data: SignupFormData) => {
     setIsLoading(true);
+    setServerError(null);
+
     try {
-      const response = await registerUser({
-        username,
-        fullName,
-        email,
-        password,
-        country,
-      });
-      toast.success(
-        "Registration successful! Please check your email for the OTP."
-      );
+      await registerUser(data);
+      toast.success("Registration successful! Please check your email for the OTP.");
       router.push("/verify-otp");
+    } catch (error: any) {
+      const response = error?.response?.data;
+
+      const detailedMessage = error?.details?.[0]?.message;
+      const generalMessage = response?.message || response?.error || error?.message || "Something went wrong, please try again.";
+
+      const finalMessage = detailedMessage || generalMessage;
+      setServerError(finalMessage);
+      toast.error(finalMessage);
+    } finally {
       setIsLoading(false);
-    } 
-    // catch (error) {
-    //   if (axios.isAxiosError(error) && error.response) {
-    //     const apiError = error.response.data as { message: string };
-    //     console.error("Signup error:", apiError.message);
-    //     toast.error(apiError.message || "Something went wrong");
-    //   } else if ((error as any)?.message) {
-    //     console.error("Signup error:", (error as any).message);
-    //     toast.error((error as any).message);
-    //   } else {
-    //     console.error("Signup error:", error);
-    //     toast.error("An unexpected error occurred.");
-    //   }
-    // }
-    catch (error: any) {
-          const errorMessage =
-            error?.response?.data?.message ||
-            error?.message ||
-            "Something went wrong";
-        
-          setError(errorMessage);
-          setIsLoading(false); 
-        }
+    }
   };
 
   return (
@@ -74,96 +77,66 @@ export function SignupForm({
           <form
             className="p-6 md:p-8 border-r-2"
             style={{ borderRight: "2px solid orange" }}
-            onSubmit={handleSubmit}
+            onSubmit={handleSubmit(onSubmit)}
           >
             <div className="flex flex-col gap-6">
               <div className="flex flex-col items-center text-center">
-                <h1 className="text-2xl text-white font-bold">
-                  Create an account
-                </h1>
-                <p className="text-balance text-white">
-                  Sign up for your PLS account
-                </p>
+                <h1 className="text-2xl text-white font-bold">Create an account</h1>
+                <p className="text-balance text-white">Sign up for your PLS account</p>
               </div>
-              {error && <p className="text-red-500 text-center">{error}</p>}
-              <div className="grid gap-2 ">
+
+              {serverError && <p className="text-red-500 text-center">{serverError}</p>}
+
+              <div className="grid gap-2">
                 <Label className="text-white" htmlFor="username">
                   Username
                 </Label>
-                <Input
-                  id="username"
-                  type="text"
-                  placeholder="johndoe"
-                  required
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                />
+                <Input id="username" type="text" placeholder="johndoe" {...register("username")} />
+                {errors.username && <p className="text-red-500 text-sm">{errors.username.message}</p>}
               </div>
-              <div className="grid gap-2 ">
+
+              <div className="grid gap-2">
                 <Label className="text-white" htmlFor="fullName">
                   Full Name
                 </Label>
-                <Input
-                  id="fullName"
-                  type="text"
-                  placeholder="John Doe"
-                  required
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                />
+                <Input id="fullName" type="text" placeholder="John Doe" {...register("fullName")} />
+                {errors.fullName && <p className="text-red-500 text-sm">{errors.fullName.message}</p>}
               </div>
-              <div className="grid gap-2 ">
+
+              <div className="grid gap-2">
                 <Label className="text-white" htmlFor="email">
                   Email
                 </Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="Enter your email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
+                <Input id="email" type="email" placeholder="Enter your email" {...register("email")} />
+                {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
               </div>
-              <div className="grid gap-2 ">
+
+              <div className="grid gap-2">
                 <Label htmlFor="password" className="text-white">
                   Password
                 </Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="Enter your password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
+                <Input id="password" type="password" placeholder="Enter your password" {...register("password")} />
+                {errors.password && <p className="text-red-500 text-sm">{errors.password.message}</p>}
               </div>
-              <div className="grid gap-2 ">
+
+              <div className="grid gap-2">
                 <Label htmlFor="country" className="text-white">
                   Country
                 </Label>
-                <Input
-                  id="country"
-                  type="text"
-                  placeholder="Enter your Country"
-                  required
-                  value={country}
-                  onChange={(e) => setCountry(e.target.value)}
-                />
+                <Input id="country" type="text" placeholder="Enter your Country" {...register("country")} />
+                {errors.country && <p className="text-red-500 text-sm">{errors.country.message}</p>}
               </div>
+
               {isLoading ? (
                 <Button className="w-full bg-[#FF6B35] text-white" disabled>
-                  <LoaderCircle className="mr-2 h-4 w-4 animate-spin" /> Signing
-                  Up
+                  <LoaderCircle className="mr-2 h-4 w-4 animate-spin" /> Signing Up
                 </Button>
               ) : (
-                <Button
-                  type="submit"
-                  className="w-full bg-[#FF6B35] text-white"
-                >
+                <Button type="submit" className="w-full bg-[#FF6B35] text-white">
                   Sign Up
                 </Button>
               )}
+
               <div className="text-center text-white text-sm">
                 Already have an account?{" "}
                 <a
@@ -179,6 +152,7 @@ export function SignupForm({
               </div>
             </div>
           </form>
+
           <div className="relative hidden bg-[#003087] md:block">
             <Image
               src={SignUpImg}
@@ -190,9 +164,10 @@ export function SignupForm({
           </div>
         </CardContent>
       </Card>
+
       <div className="text-balance text-center text-xs text-muted-foreground [&_a]:underline [&_a]:underline-offset-4 hover:[&_a]:text-primary">
-        By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
-        and <a href="#">Privacy Policy</a>.
+        By clicking continue, you agree to our <a href="#">Terms of Service</a> and{" "}
+        <a href="#">Privacy Policy</a>.
       </div>
     </div>
   );
