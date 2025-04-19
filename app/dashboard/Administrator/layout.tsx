@@ -161,6 +161,9 @@ export default function AdministratorLayout({
               if (item.title === "Trash" && userRole === "MODERATOR") {
                 return null; // Hide the "Trash" item if the user is not an admin
               }
+              if (item.title === "Project Requests" && userRole === "MODERATOR") {
+                return null; // Hide the "Trash" item if the user is not an admin
+              }
               return (
                 <Button
                   key={item.title}
