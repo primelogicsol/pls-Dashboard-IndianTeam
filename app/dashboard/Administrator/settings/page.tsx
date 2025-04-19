@@ -19,7 +19,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import {
-  sendOtp,
+  getCurrentUserDetails,
   sendOtpForVerifyingUser,
   updateUserEmail,
   updateUserInfo,
@@ -28,10 +28,18 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 
 const profileFormSchema = z.object({
-  username: z.string().min(4, { message: "Username must be at least 4 characters." }),
-  fullName: z.string().min(4, { message: "Full Name must be at least 4 characters." }),
-  address: z.string().min(4, { message: "Full Name must be at least 4 characters." }),
-  phone: z.string().min(10, { message: "Phone Number must be at least 10 digits." }),
+  username: z
+    .string()
+    .min(4, { message: "Username must be at least 4 characters." }),
+  fullName: z
+    .string()
+    .min(4, { message: "Full Name must be at least 4 characters." }),
+  address: z
+    .string()
+    .min(4, { message: "Full Name must be at least 4 characters." }),
+  phone: z
+    .string()
+    .min(10, { message: "Phone Number must be at least 10 digits." }),
 });
 
 const emailFormSchema = z.object({
@@ -43,25 +51,74 @@ export default function AdministratorSettingsPage() {
   const [showOtpSection, setShowOtpSection] = useState(false);
   const [email, setEmail] = useState("");
   const { isAuthorized } = useAuth(["MODERATOR", "ADMIN"]);
+  const [userDetails, setUserDetails] = useState({
+    username: "Enter your username",
+    fullName: "Enter your full name",
+    email: "Enter your email",
+    phoneNumber: "Enter your phnone number",
+    address: "Enter your address",
+  });
+
+  useEffect(() => {
+    getUserDetails();
+  }, []);
+
+  const getUserDetails = async () => {
+    try {
+      const response = await getCurrentUserDetails();
+      const data = response.data;
+      setUserDetails(data);
+      profileForm.reset({
+        username: data.username,
+        fullName: data.fullName,
+        address: data.address,
+        phone: data.phoneNumber,
+      });
+
+      emailForm.reset({ email: data.email });
+    } catch (error: any) {
+      toast.error(
+        error?.response?.data?.message ||
+          "An error occurred while fetching user details."
+      );
+    }
+  };
 
   const profileForm = useForm<z.infer<typeof profileFormSchema>>({
     resolver: zodResolver(profileFormSchema),
-    defaultValues: { username: "", fullName: "", address: "", phone: "" },
+    defaultValues: {
+      username: userDetails.username,
+      fullName: userDetails.fullName,
+      address: userDetails.address,
+      phone: userDetails?.phoneNumber,
+    },
   });
 
   const emailForm = useForm<z.infer<typeof emailFormSchema>>({
     resolver: zodResolver(emailFormSchema),
-    defaultValues: { email: "", otp: "" },
+    defaultValues: { email: userDetails.email, otp: "" },
   });
 
-  async function onProfileSubmit(data: { username: string; fullName: string, address: string, phone: string }) {
+  async function onProfileSubmit(data: {
+    username: string;
+    fullName: string;
+    address: string;
+    phone: string;
+  }) {
     try {
-      await updateUserInfo(data.username, data.fullName, data.address, data.phone);
+      await updateUserInfo(
+        data.username,
+        data.fullName,
+        data.address,
+        data.phone
+      );
       toast.success("Profile updated successfully!");
     } catch (error: any) {
       profileForm.setError("username", {
         type: "manual",
-        message: error?.response?.data?.details?.[0]?.message || "An error occurred while updating profile.",
+        message:
+          error?.response?.data?.details?.[0]?.message ||
+          "An error occurred while updating profile.",
       });
     }
   }
@@ -76,7 +133,9 @@ export default function AdministratorSettingsPage() {
     } catch (error: any) {
       emailForm.setError("email", {
         type: "manual",
-        message: error?.response?.data?.details?.[0]?.message || "An error occurred while updating email.",
+        message:
+          error?.response?.data?.details?.[0]?.message ||
+          "An error occurred while updating email.",
       });
     }
   }
@@ -97,7 +156,7 @@ export default function AdministratorSettingsPage() {
     }
   }
 
-  if(!isAuthorized) return null;
+  if (!isAuthorized) return null;
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -163,14 +222,20 @@ export default function AdministratorSettingsPage() {
                     <FormItem>
                       <FormLabel>Phone Number</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="Enter your phone number" />
+                        <Input
+                          {...field}
+                          placeholder="Enter your phone number"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
               </div>
-              <Button type="button" onClick={profileForm.handleSubmit(onProfileSubmit)}>
+              <Button
+                type="button"
+                onClick={profileForm.handleSubmit(onProfileSubmit)}
+              >
                 Update Info
               </Button>
             </form>
@@ -192,13 +257,22 @@ export default function AdministratorSettingsPage() {
                   <FormItem>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input {...field} type="email" disabled={showOtpSection} placeholder="Enter your email" />
+                      <Input
+                        {...field}
+                        type="email"
+                        disabled={showOtpSection}
+                        placeholder="Enter your email"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <Button type="button" onClick={emailForm.handleSubmit(onEmailSubmit)} disabled={showOtpSection}>
+              <Button
+                type="button"
+                onClick={emailForm.handleSubmit(onEmailSubmit)}
+                disabled={showOtpSection}
+              >
                 Update Email
               </Button>
             </form>
@@ -211,13 +285,21 @@ export default function AdministratorSettingsPage() {
                     <FormItem>
                       <FormLabel>OTP</FormLabel>
                       <FormControl>
-                        <Input {...field} type="text" maxLength={6} placeholder="Enter OTP" />
+                        <Input
+                          {...field}
+                          type="text"
+                          maxLength={6}
+                          placeholder="Enter OTP"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                <Button className="mt-4 w-full" onClick={emailForm.handleSubmit(onOtpSubmit)}>
+                <Button
+                  className="mt-4 w-full"
+                  onClick={emailForm.handleSubmit(onOtpSubmit)}
+                >
                   Verify Your Email
                 </Button>
               </>
