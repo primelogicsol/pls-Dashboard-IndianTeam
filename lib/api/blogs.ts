@@ -71,9 +71,9 @@ export async function deleteABlog(blogSLug: string) {
 }
 
 // Update a blog
-export async function updateABlog(blogSlug: string) {
+export async function updateABlog(blogSlug: string, blogData: any) {
   try{
-    const response = await apiInstance.patch(`/blog/updateBlog/${blogSlug}`);
+    const response = await apiInstance.patch(`/blog/updateBlog/${blogSlug}`, blogData);
     if(response?.status === 200) {
       return response.data;
     }
