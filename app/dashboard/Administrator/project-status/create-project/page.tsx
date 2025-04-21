@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { createAProject } from "@/lib/api/projects";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 const projectSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters long"),
@@ -72,8 +73,14 @@ export default function Page() {
         </div>
 
         <div>
-          <Label htmlFor="deadline">Deadline</Label>
-          <Input id="deadline" type="datetime-local" {...register("deadline")} className="w-full" />
+            <Label htmlFor="deadline">Deadline</Label>
+            <Input 
+            id="deadline" 
+            type="datetime-local" 
+            min={new Date().toISOString().slice(0, 16)} 
+            {...register("deadline")} 
+            className="w-full"  
+            />
           {errors.deadline && <p className="text-red-500 text-sm">{errors.deadline.message}</p>}
         </div>
 

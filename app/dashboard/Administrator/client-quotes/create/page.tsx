@@ -83,7 +83,7 @@ export default function QuoteForm() {
         <div>
           <Label>Address</Label>
           <Input {...register("address")} />
-          {errors.address && <p className="text-red-500 text-sm">{errors.address.message}</p>}
+          {errors.address && <p className="text-red-500 text-sm">{String(errors.address.message)}</p>}
         </div>
         <div>
           <Label>Deadline</Label>
@@ -92,7 +92,7 @@ export default function QuoteForm() {
         <div>
           <Label>Services</Label>
           <Input {...register("services")} />
-          {errors.services && <p className="text-red-500 text-sm">{errors.services.message}</p>}
+          {errors.services && <p className="text-red-500 text-sm">{String(errors.services.message)}</p>}
         </div>
         <div className="col-span-2">
           <Label>Details</Label>

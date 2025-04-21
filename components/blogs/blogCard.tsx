@@ -60,7 +60,7 @@ export function BlogCard({
 
   // Handle edit blog
   const handleEdit = () => {
-    router.push(`/dashboard/Administrator/blogs/edit/${blog.blogId}`);
+    router.push(`/dashboard/Administrator/blogs/${blog.blogSlug}/edit`);
   };
 
   // Handle view blog

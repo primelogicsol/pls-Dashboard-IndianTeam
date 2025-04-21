@@ -45,19 +45,13 @@ export default function ClientDashboardLayout({
 }: {
   children: ReactNode;
 }) {
-  // 1️⃣ State Hooks (First)
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
-
-  // 2️⃣ Authentication Hook (Before routing hooks)
   const { isAuthorized } = useAuth(["CLIENT"]);
-
-  // 3️⃣ Routing Hooks (Next.js navigation)
   const pathname = usePathname();
   const router = useRouter();
 
-  // 4️⃣ Helper function (Before `useEffect`)
   async function getCurrentUserDetail() {
     try {
       const userDetails = await getCurrentUserDetails();
@@ -69,7 +63,6 @@ export default function ClientDashboardLayout({
     }
   }
 
-  // 5️⃣ Effect Hook (Runs last)
   useEffect(() => {
     getCurrentUserDetail();
   }, []);
@@ -109,7 +102,6 @@ export default function ClientDashboardLayout({
                 style={{ color: "#003087" }}
               >
                 <div>
-                  {/* <p className="text-lg">PRIME LOGIC SOLUTIONS</p> */}
                   <p className="text-sm text-[#FF6B35]">CLIENT DASHBOARD</p>
                 </div>
               </motion.span>
