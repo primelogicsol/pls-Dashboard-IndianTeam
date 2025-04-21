@@ -111,16 +111,16 @@ export default function QuotesPage() {
   return (
     <Suspense fallback={<p className="text-center p-4">Loading quotes...</p>}>
       <div className="p-6 bg-white shadow-lg rounded-lg">
-        <div className="flex justify-between items-center mb-4">
+        {/* <div className="flex justify-between items-center mb-4">
           <h2 className="text-2xl font-semibold">Quotes</h2>
           <Button
             onClick={() =>
-              router.push("/dashboard/Administrator/quotes/create")
+              router.push("/dashboard/Administrator/client-quotes/create")
             }
           >
             <PlusCircle className="mr-2 h-5 w-5" /> Create New Quote
           </Button>
-        </div>
+        </div> */}
         <div className="flex justify-between items-center mb-4">
           <Input
             placeholder="Search..."

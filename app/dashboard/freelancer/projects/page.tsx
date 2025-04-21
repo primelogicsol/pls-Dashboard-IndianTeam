@@ -150,12 +150,12 @@ export default function ProjectsPage() {
             className="border p-2 rounded w-full sm:w-auto"
           >
             <option value="">All Levels</option>
-            <option value="easy">Easy</option>
-            <option value="medium">Medium</option>
-            <option value="hard">Hard</option>
+            <option value="EASY">Easy</option>
+            <option value="MEDIUM">Medium</option>
+            <option value="HARD">Hard</option>
           </select>
 
-          <select
+          {/* <select
             value={filters.nicheName}
             onChange={(e) =>
               setFilters({ ...filters, nicheName: e.target.value })
@@ -165,7 +165,7 @@ export default function ProjectsPage() {
             <option value="">All Niches</option>
             <option value="web">Web Development</option>
             <option value="mobile">Mobile Development</option>
-          </select>
+          </select> */}
 
           <select
             value={filters.createdAtOrder}

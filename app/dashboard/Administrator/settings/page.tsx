@@ -36,7 +36,7 @@ const profileFormSchema = z.object({
     .min(4, { message: "Full Name must be at least 4 characters." }),
   address: z
     .string()
-    .min(4, { message: "Full Name must be at least 4 characters." }),
+    .min(4, { message: "Address must be at least 4 characters." }),
   phone: z
     .string()
     .min(10, { message: "Phone Number must be at least 10 digits." }),
