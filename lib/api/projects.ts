@@ -352,3 +352,22 @@ export async function createAProject(data: any) {
   }
 }
 
+export async function giveFeedbackAndRatings(projectSlug: string, data: any) {
+  try {
+    const response = await apiInstance.patch(`/project/writeReviewAndGiveRating/${projectSlug}`, data);
+    if(response?.status === 200) {
+      return response?.data;
+    }
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error("Axios error:", error.response?.data || error.message);
+      throw new Error(
+        error.response?.data?.message || "Failed to Give Ratings and Feedback"
+      );
+    } else {
+      console.error("Unexpected error:", error);
+      throw new Error("An unexpected error occurred");
+    }
+  }
+}
+
