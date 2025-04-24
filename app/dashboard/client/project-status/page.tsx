@@ -295,7 +295,7 @@ export default function ClientProjectStatusPage() {
                     <p className="text-sm text-muted-foreground">No Developers assigned yet</p>
                   )}
                 </div>
-                {selectedProject?.progressPercentage === 100 && (
+                {selectedProject.progressPercentage === 100 && (
                   <Button
                     variant="default"
                     className="flex items-center gap-2 text-sm text-green-600"
