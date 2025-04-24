@@ -1,11 +1,11 @@
-"use client";
+"use client"
 
-import type React from "react";
+import type React from "react"
 
-import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { useState, useEffect } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
 import {
   Pagination,
   PaginationContent,
@@ -13,117 +13,108 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "@/components/ui/pagination";
-import { Search } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
-import { BlogCard } from "@/components/blogs/blogCard";
-import {
-  getAllPublicBlogs,
-  deleteABlog,
-  updateBlogVisibility,
-} from "@/lib/api/blogs";
-import { toast } from "sonner";
-import { useAuth } from "@/hooks/useAuth";
+  PaginationEllipsis,
+} from "@/components/ui/pagination"
+import { Search } from "lucide-react"
+import { Skeleton } from "@/components/ui/skeleton"
+import { BlogCard } from "@/components/blogs/blogCard"
+import { getAllPublicBlogs, deleteABlog, updateBlogVisibility } from "@/lib/api/blogs"
+import { toast } from "sonner"
+import { useAuth } from "@/hooks/useAuth"
+
 export interface Blog {
-  blogId: number;
-  blogTitle: string;
-  blogSlug: string;
-  blogThumbnail: string;
-  blogOverview: string;
-  blogBody?: string;
-  isPublished: boolean;
-  createdAt: string;
+  blogId: number
+  blogTitle: string
+  blogSlug: string
+  blogThumbnail: string
+  blogOverview: string
+  blogBody?: string
+  isPublished: boolean
+  createdAt: string
 }
 
 export interface BlogsResponse {
-  success: boolean;
-  status: number;
-  message: string;
+  success: boolean
+  status: number
+  message: string
   data: {
-    blogs: Blog[];
-    pagination: PaginationInfo;
-  };
+    blogs: Blog[]
+    pagination: PaginationInfo
+  }
   requestInfo: {
-    url: string;
-    ip: string;
-    method: string;
-  };
+    url: string
+    ip: string
+    method: string
+  }
 }
+
 export interface PaginationInfo {
-  page: number;
-  limit: number;
-  totalPages: number;
-  totalBlogs: number;
-  hasNextPage: boolean;
-  hasPreviousPage: boolean;
+  page: number
+  limit: number
+  totalPages: number
+  totalBlogs: number
+  hasNextPage: boolean
+  hasPreviousPage: boolean
 }
 
 export default function BlogsPage() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
+  const router = useRouter()
+  const searchParams = useSearchParams()
 
   // State for blogs data
-  const [blogsData, setBlogsData] = useState<BlogsResponse | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
+  const [blogsData, setBlogsData] = useState<BlogsResponse | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [searchQuery, setSearchQuery] = useState("")
 
-  const { isAuthorized } = useAuth(["ADMIN", "MODERATOR"]);
+  const { isAuthorized } = useAuth(["ADMIN", "MODERATOR"])
 
   // Get current page from URL or default to 1
-  const currentPage = Number.parseInt(searchParams.get("page") || "1");
-  const limit = Number.parseInt(searchParams.get("limit") || "10");
-
-  // Debounce search input
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearchQuery(searchQuery);
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
+  const currentPage = Number.parseInt(searchParams.get("page") || "1")
+  const limit = Number.parseInt(searchParams.get("limit") || "10")
 
   // Fetch blogs data
   useEffect(() => {
     const fetchBlogs = async () => {
-      setLoading(true);
+      setLoading(true)
       try {
-        const response = await getAllPublicBlogs(currentPage, limit);
-        setBlogsData(response);
+        const response = await getAllPublicBlogs(currentPage, limit)
+        setBlogsData(response)
+        console.log("Fetched blogs data:", response) // Debug log
       } catch (error) {
-        console.error("Error fetching blogs:", error);
-        toast.error("Failed to load blogs");
+        console.error("Error fetching blogs:", error)
+        toast.error("Failed to load blogs")
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
-    };
+    }
 
-    fetchBlogs();
-  }, [currentPage, limit, debouncedSearchQuery]);
-
-
-   // Conditional rendering happens after all hooks have been called
-   if (loading) return <p>Loading...</p>;
-   if (!isAuthorized) return null; // Prevent rendering if unauthorized
+    fetchBlogs()
+  }, [currentPage, limit])
 
   // Handle search input change
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-  };
+    setSearchQuery(e.target.value)
+  }
+
+  // Filter blogs based on search query
+  const filteredBlogs =
+    blogsData?.data.blogs.filter(
+      (blog) =>
+        blog.blogTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        blog.blogOverview.toLowerCase().includes(searchQuery.toLowerCase()),
+    ) || []
 
   // Handle delete blog
   const handleDeleteBlog = async (blogSlug: string, blogId: number) => {
     try {
-      const response = await deleteABlog(blogSlug);
+      const response = await deleteABlog(blogSlug)
       if (response.status === 200) {
-        toast.success("Blog deleted successfully");
+        toast.success("Blog deleted successfully")
       }
 
       // Update local state after successful deletion
       if (blogsData) {
-        const updatedBlogs = blogsData.data.blogs.filter(
-          (blog) => blog.blogId !== blogId
-        );
+        const updatedBlogs = blogsData.data.blogs.filter((blog) => blog.blogId !== blogId)
         setBlogsData({
           ...blogsData,
           data: {
@@ -134,25 +125,25 @@ export default function BlogsPage() {
               totalBlogs: blogsData.data.pagination.totalBlogs - 1,
             },
           },
-        });
+        })
       }
     } catch (error) {
-      console.error("Error deleting blog:", error);
-      toast.error("Failed to delete blog");
+      console.error("Error deleting blog:", error)
+      toast.error("Failed to delete blog")
     }
-  };
+  }
 
   // Handle visibility toggle
   const handleVisibilityToggle = async (blog: Blog) => {
     try {
-      const newVisibility = !blog.isPublished;
-      await updateBlogVisibility(blog.blogSlug, newVisibility);
+      const newVisibility = !blog.isPublished
+      await updateBlogVisibility(blog.blogSlug, newVisibility)
 
       // Update local state after successful update
       if (blogsData) {
         const updatedBlogs = blogsData.data.blogs.map((b) =>
-          b.blogId === blog.blogId ? { ...b, isPublished: newVisibility } : b
-        );
+          b.blogId === blog.blogId ? { ...b, isPublished: newVisibility } : b,
+        )
 
         setBlogsData({
           ...blogsData,
@@ -160,24 +151,90 @@ export default function BlogsPage() {
             ...blogsData.data,
             blogs: updatedBlogs,
           },
-        });
+        })
       }
 
-      toast.success(`Blog is now ${newVisibility ? "public" : "private"}`);
+      toast.success(`Blog is now ${newVisibility ? "public" : "private"}`)
     } catch (error) {
-      console.error("Error updating blog visibility:", error);
-      toast.error("Failed to change the status of the blog");
+      console.error("Error updating blog visibility:", error)
+      toast.error("Failed to change the status of the blog")
     }
-  };
+  }
 
   // Handle page change
   const handlePageChange = (page: number) => {
-    router.push(
-      `?page=${page}&limit=${limit}${
-        debouncedSearchQuery ? `&search=${encodeURIComponent(debouncedSearchQuery)}` : ""
-      }`
-    );
-  }; 
+    router.push(`?page=${page}&limit=${limit}`)
+  }
+
+  // Generate pagination items
+  const getPaginationItems = () => {
+    if (!blogsData) return []
+
+    const totalPages = blogsData.data.pagination.totalPages
+    const current = currentPage
+
+    // If 7 or fewer pages, show all pages
+    if (totalPages <= 7) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1)
+    }
+
+    // Always include first page, last page, and pages around current page
+    const items = []
+
+    // Always show first page
+    items.push(1)
+
+    // Show ellipsis after first page if current page is > 3
+    if (current > 3) {
+      items.push("ellipsis-start")
+    }
+
+    // Calculate range around current page
+    let rangeStart = Math.max(2, current - 1)
+    let rangeEnd = Math.min(totalPages - 1, current + 1)
+
+    // Adjust range to always show 3 pages if possible
+    if (current <= 3) {
+      rangeEnd = Math.min(4, totalPages - 1)
+    } else if (current >= totalPages - 2) {
+      rangeStart = Math.max(totalPages - 3, 2)
+    }
+
+    // Add range pages
+    for (let i = rangeStart; i <= rangeEnd; i++) {
+      items.push(i)
+    }
+
+    // Show ellipsis before last page if needed
+    if (current < totalPages - 2) {
+      items.push("ellipsis-end")
+    }
+
+    // Always show last page
+    if (totalPages > 1) {
+      items.push(totalPages)
+    }
+
+    return items
+  }
+
+  // Conditional rendering happens after all hooks have been called
+  if (loading) {
+    return (
+      <div className="container mx-auto py-8 px-4">
+        <h1 className="text-3xl font-bold mb-8">Blog Management</h1>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[...Array(6)].map((_, index) => (
+            <Skeleton key={index} className="h-[400px] w-full rounded-lg" />
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  if (!isAuthorized) return null // Prevent rendering if unauthorized
+
+  const paginationItems = getPaginationItems()
 
   return (
     <div className="container mx-auto py-8 px-4">
@@ -195,33 +252,22 @@ export default function BlogsPage() {
             className="pl-10"
           />
         </div>
-        <Button
-          onClick={() => router.push("/dashboard/Administrator/blogs/create")}
-        >
-          Add New Blog
-        </Button>
+        <Button onClick={() => router.push("/dashboard/Administrator/blogs/create")}>Add New Blog</Button>
       </div>
 
       {/* Blog Count */}
-      {!loading && blogsData && (
+      {blogsData && (
         <div className="mb-6">
           <p className="text-muted-foreground">
-            Showing {blogsData.data.blogs.length} of{" "}
-            {blogsData.data.pagination.totalBlogs} blogs
+            Showing {filteredBlogs.length} of {blogsData.data.pagination.totalBlogs} blogs
           </p>
         </div>
       )}
 
       {/* Blogs Grid */}
-      {loading ? (
+      {filteredBlogs.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[...Array(6)].map((_, index) => (
-            <Skeleton key={index} className="h-[400px] w-full rounded-lg" />
-          ))}
-        </div>
-      ) : blogsData && blogsData.data.blogs.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {blogsData.data.blogs.map((blog) => (
+          {filteredBlogs.map((blog) => (
             <BlogCard
               key={blog.blogId}
               blog={blog}
@@ -232,98 +278,70 @@ export default function BlogsPage() {
         </div>
       ) : (
         <div className="text-center py-12">
-          <p className="text-muted-foreground">
-            No blogs found. Try adjusting your search criteria.
-          </p>
+          <p className="text-muted-foreground">No blogs found. Try adjusting your search criteria.</p>
         </div>
       )}
 
-{!loading && blogsData && blogsData.data.pagination.totalPages > 1 && (
+      {/* Advanced Pagination */}
+      {blogsData && blogsData.data.pagination.totalPages > 1 && (
         <Pagination className="mt-8">
           <PaginationContent>
-            {/* First page */}
-            {currentPage > 2 && (
-              <PaginationItem>
-                <PaginationLink
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handlePageChange(1);
-                  }}
-                >
-                  1
-                </PaginationLink>
-              </PaginationItem>
-            )}
-
-            {/* Ellipsis if needed */}
-            {currentPage > 3 && (
-              <PaginationItem>
-                <span className="flex h-9 w-9 items-center justify-center">...</span>
-              </PaginationItem>
-            )}
-
-            {/* Previous page */}
-            {currentPage > 1 && (
-              <PaginationItem>
-                <PaginationLink
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handlePageChange(currentPage - 1);
-                  }}
-                >
-                  {currentPage - 1}
-                </PaginationLink>
-              </PaginationItem>
-            )}
-
-            {/* Current page */}
+            {/* Previous button - always show but disable if on first page */}
             <PaginationItem>
-              <PaginationLink href="#" isActive onClick={(e) => e.preventDefault()}>
-                {currentPage}
-              </PaginationLink>
+              <PaginationPrevious
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault()
+                  if (currentPage > 1) {
+                    handlePageChange(currentPage - 1)
+                  }
+                }}
+                className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
+              />
             </PaginationItem>
 
-            {/* Next page */}
-            {currentPage < blogsData.data.pagination.totalPages && (
-              <PaginationItem>
-                <PaginationLink
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handlePageChange(currentPage + 1);
-                  }}
-                >
-                  {currentPage + 1}
-                </PaginationLink>
-              </PaginationItem>
-            )}
+            {/* Dynamic page numbers with ellipsis */}
+            {paginationItems.map((item, index) => {
+              if (item === "ellipsis-start" || item === "ellipsis-end") {
+                return (
+                  <PaginationItem key={`ellipsis-${index}`}>
+                    <PaginationEllipsis />
+                  </PaginationItem>
+                )
+              }
 
-            {/* Ellipsis if needed */}
-            {currentPage < blogsData.data.pagination.totalPages - 2 && (
-              <PaginationItem>
-                <span className="flex h-9 w-9 items-center justify-center">...</span>
-              </PaginationItem>
-            )}
+              return (
+                <PaginationItem key={`page-${item}`}>
+                  <PaginationLink
+                    href="#"
+                    isActive={item === currentPage}
+                    onClick={(e) => {
+                      e.preventDefault()
+                      handlePageChange(item as number)
+                    }}
+                  >
+                    {item}
+                  </PaginationLink>
+                </PaginationItem>
+              )
+            })}
 
-            {/* Last page */}
-            {currentPage < blogsData.data.pagination.totalPages - 1 && (
-              <PaginationItem>
-                <PaginationLink
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handlePageChange(blogsData.data.pagination.totalPages);
-                  }}
-                >
-                  {blogsData.data.pagination.totalPages}
-                </PaginationLink>
-              </PaginationItem>
-            )}
+            {/* Next button - always show but disable if on last page */}
+            <PaginationItem>
+              <PaginationNext
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault()
+                  if (currentPage < blogsData.data.pagination.totalPages) {
+                    handlePageChange(currentPage + 1)
+                  }
+                }}
+                className={currentPage === blogsData.data.pagination.totalPages ? "pointer-events-none opacity-50" : ""}
+              />
+            </PaginationItem>
           </PaginationContent>
         </Pagination>
       )}
     </div>
-  );
+  )
 }
