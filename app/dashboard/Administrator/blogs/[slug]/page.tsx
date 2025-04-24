@@ -83,7 +83,7 @@ export default function BlogPreviewPage() {
 
   const handleEdit = () => {
     if (blog) {
-      router.push(`/blog/edit/${blog.blogId}`);
+      router.push(`/dashboard/Administrator/blogs/${blog.blogSlug}/edit`);
     }
   };
 
@@ -105,7 +105,7 @@ export default function BlogPreviewPage() {
               variant={blog.isPublic ? "default" : "secondary"}
               className="flex gap-1 items-center"
             >
-              {blog.isPublic ? (
+              {blog.isPublished ? (
                 <>
                   <Globe className="h-3 w-3" />
                   <span>Public</span>
@@ -138,7 +138,7 @@ export default function BlogPreviewPage() {
         </div>
       ) : blog ? (
         <div>
-          {!blog.isPublic && (
+          {!blog.isPublished && (
             <Alert className="mb-6 bg-amber-50 text-amber-800 border-amber-200">
               <AlertDescription>
                 This blog is currently set to private. Only you can see it. Make
