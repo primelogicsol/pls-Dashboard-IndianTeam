@@ -15,13 +15,14 @@ import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { getCurrentUserDetails } from "@/lib/api/auth";
 import { setUserDetails } from "@/lib/api/storage";
+import { max } from "date-fns";
 
 // Zod schema for validation
 const formSchema = z.object({
-  firstName: z.string().min(2, { message: "First name must be at least 2 characters." }),
-  lastName: z.string().min(2, { message: "Last name must be at least 2 characters." }),
+  firstName: z.string().min(2, { message: "First name must be at least 2 characters." }).max(50, { message: "First name must be at most 50 characters." }),
+  lastName: z.string().min(2, { message: "Last name must be at least 2 characters." }).max(50, { message: "Last name must be at most 50 characters." }),
   email: z.string().email({ message: "Invalid email address." }),
-  message: z.string().min(10, { message: "Message must be at least 10 characters." }),
+  message: z.string().min(10, { message: "Message must be at least 10 characters." }).max(500, { message: "Message must be at most 500 characters." }),
 });
 
 export default function ContactForm() {
