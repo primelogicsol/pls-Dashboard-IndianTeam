@@ -50,25 +50,25 @@ export default function Page() {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 w-full">
         <div>
           <Label htmlFor="title">Title</Label>
-          <Input id="title" {...register("title")} className="w-full" />
+          <Input id="title" {...register("title")} className="w-full" required/>
           {errors.title && <p className="text-red-500 text-sm">{errors.title.message}</p>}
         </div>
 
         <div>
           <Label htmlFor="detail">Detail</Label>
-          <Textarea id="detail" {...register("detail")} className="w-full" />
+          <Textarea id="detail" {...register("detail")} className="w-full" required/>
           {errors.detail && <p className="text-red-500 text-sm">{errors.detail.message}</p>}
         </div>
 
         <div>
           <Label htmlFor="niche">Niche</Label>
-          <Input id="niche" {...register("niche")} className="w-full" />
+          <Input id="niche" {...register("niche")} className="w-full" required/>
           {errors.niche && <p className="text-red-500 text-sm">{errors.niche.message}</p>}
         </div>
 
         <div>
           <Label htmlFor="bounty">Bounty</Label>
-          <Input id="bounty" type="number" {...register("bounty", { valueAsNumber: true })} className="w-full" />
+          <Input id="bounty" type="number" {...register("bounty", { valueAsNumber: true })} className="w-full" required/>
           {errors.bounty && <p className="text-red-500 text-sm">{errors.bounty.message}</p>}
         </div>
 
@@ -80,6 +80,7 @@ export default function Page() {
             min={new Date().toISOString().slice(0, 16)} 
             {...register("deadline")} 
             className="w-full"  
+            required
             />
           {errors.deadline && <p className="text-red-500 text-sm">{errors.deadline.message}</p>}
         </div>
@@ -101,7 +102,8 @@ export default function Page() {
 
         <div>
           <Label htmlFor="clientWhoPostedThisProjectForeignId">Client UID</Label>
-          <Input id="clientWhoPostedThisProjectForeignId" placeholder="Enter the UID of the client" {...register("clientWhoPostedThisProjectForeignId")} className="w-full" />
+          <p className="text-xs">Fetch the UID from client profiles page</p>
+          <Input id="clientWhoPostedThisProjectForeignId" placeholder="Enter the client UID" {...register("clientWhoPostedThisProjectForeignId")} className="w-full" required/>
           {errors.clientWhoPostedThisProjectForeignId && <p className="text-red-500 text-sm">{errors.clientWhoPostedThisProjectForeignId.message}</p>}
         </div>
 
