@@ -16,7 +16,7 @@ import {
 import { Progress } from "../ui/progress";
 import { CalendarIcon, CheckCircle, Edit, Save, X } from "lucide-react";
 import { Button } from "../ui/button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import * as z from "zod";
 import {
   Form,
@@ -44,6 +44,7 @@ import { Checkbox } from "../ui/checkbox";
 import { Textarea } from "../ui/textarea";
 import { updateProjectBySlug } from "@/lib/api/projects";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 // Get difficulty badge color
 const getDifficultyColor = (level: TDIFFICULTYLEVEL) => {
@@ -85,26 +86,62 @@ export default function ProjectInformation({
   slug,
 }: ProjectInformationProps) {
   const [isEditing, setIsEditing] = useState(false);
+  const router = useRouter();
 
   // Form schema for project update
   const formSchema = z.object({
     title: z
       .string()
-      .min(5, { message: "Title must be at least 5 characters" }),
+      .transform(val => val?.trim() === "" ? undefined : val)
+      .optional()
+      .refine(val => !val || val.length >= 5, {
+        message: "Title must be at least 5 characters",
+      }),
+  
     detail: z
       .string()
-      .min(20, { message: "Detail must be at least 20 characters" }),
-    projectType: z.enum(["INHOUSE", "OUTSOURCE"]),
-    niche: z.string().min(2, { message: "Niche is required" }),
-    bounty: z.coerce
-      .number()
-      .positive({ message: "Bounty must be a positive number" }),
-    deadline: z.string(),
-    projectStatus: z.enum(["PENDING", "CANCELLED", "ONGOING", "COMPLETED"]),
-    progressPercentage: z.coerce.number().min(0).max(100),
-    isDeadlineNeedToBeExtend: z.boolean(),
-    difficultyLevel: z.enum(["EASY", "MEDIUM", "HARD"]),
+      .transform(val => val?.trim() === "" ? undefined : val)
+      .optional()
+      .refine(val => !val || val.length >= 20, {
+        message: "Detail must be at least 20 characters",
+      }),
+  
+    projectType: z.enum(["INHOUSE", "OUTSOURCE"]).optional(),
+  
+    niche: z
+      .string()
+      .transform(val => val?.trim() === "" ? undefined : val)
+      .optional()
+      .refine(val => !val || val.length >= 2, {
+        message: "Niche is required and must be at least 2 characters",
+      }),
+  
+    bounty: z
+      .union([
+        z.coerce.number().positive({ message: "Bounty must be a positive number" }),
+        z.literal(undefined),
+      ])
+      .optional(),
+  
+    deadline: z
+      .string()
+      .transform(val => val?.trim() === "" ? undefined : val)
+      .optional(),
+  
+    projectStatus: z.enum(["PENDING", "CANCELLED", "ONGOING", "COMPLETED"]).optional(),
+  
+    progressPercentage: z
+      .union([
+        z.coerce.number().min(0, { message: "Min 0%" }).max(100, { message: "Max 100%" }),
+        z.literal(undefined),
+      ])
+      .optional(),
+  
+    isDeadlineNeedToBeExtend: z.boolean().optional(),
+  
+    difficultyLevel: z.enum(["EASY", "MEDIUM", "HARD"]).optional(),
   });
+  
 
   // Initialize form with project data
   const form = useForm<TUPDATE_PROJECT>({
@@ -122,6 +159,26 @@ export default function ProjectInformation({
       difficultyLevel: project?.difficultyLevel,
     },
   });
+
+  const { reset, handleSubmit } = form;
+
+  useEffect(() => {
+    if (project) {
+      reset({
+        title: project.title,
+        detail: project.detail,
+        projectType: project.projectType,
+        niche: project.niche,
+        bounty: project.bounty,
+        deadline: project.deadline,
+        projectStatus: project.projectStatus,
+        progressPercentage: project.progressPercentage,
+        isDeadlineNeedToBeExtend: project.isDeadlineNeedToBeExtend,
+        difficultyLevel: project.difficultyLevel,
+      });
+    }
+  }, [project, reset]);
+
   // Handle form submission
   const onSubmit = async (data: TUPDATE_PROJECT) => {
     try {
@@ -130,8 +187,10 @@ export default function ProjectInformation({
         toast.success("Successfully Updated the details");
         setIsEditing(false);
       }
+      router.push("/dashboard/Administrator/project-status")
     } catch (error: any) {
       console.log(error);
+      toast.error(error.message || "An Error Occured");
     }
   };
 
