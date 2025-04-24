@@ -64,7 +64,7 @@ const navItems = [
   },
   {
     title: "Contact Us",
-    href: "/dashboard/Administrator/contactUs",
+    href: "/dashboard/Administrator/contact-us",
     icon: MessageCircle,
   },
   {
