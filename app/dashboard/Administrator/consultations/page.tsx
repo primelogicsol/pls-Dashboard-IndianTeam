@@ -353,7 +353,7 @@ function ConsultationsPage() {
                             )}
                             {consultation.status === "ACCEPTED" && (
                               <>
-                                <Dialog>
+                                {/* <Dialog>
                                   <DialogTrigger asChild>
                                     <Button>Respond</Button>
                                   </DialogTrigger>
@@ -386,7 +386,7 @@ function ConsultationsPage() {
                                       <Button>Send</Button>
                                     </div>
                                   </DialogContent>
-                                </Dialog>
+                                </Dialog> */}
                                 <Button
                                   variant="destructive"
                                   onClick={() =>

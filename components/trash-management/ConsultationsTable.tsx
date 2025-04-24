@@ -25,8 +25,18 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { motion } from "framer-motion";
-import { deleteAConsultation, untrashAConsultation } from "@/lib/api/consultations";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import {
+  deleteAConsultation,
+  untrashAConsultation,
+} from "@/lib/api/consultations";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
+import { useRouter } from "next/navigation";
 
 function ConsultationsTable() {
   const [consultations, setConsultations] = useState<Consultation[]>([]);
@@ -40,13 +50,14 @@ function ConsultationsTable() {
   const [selectedConsultation, setSelectedConsultation] =
     useState<Consultation | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [itemsPerPage, setItemsPerPage] = useState(10); // Default to 10 entries per page
-
+  const router = useRouter();
   const { isAuthorized } = useAuth(["ADMIN"]);
 
   useEffect(() => {
     fetchConsultations();
-  }, []);
+  }, [isDialogOpen]);
 
   const fetchConsultations = async () => {
     try {
@@ -125,6 +136,7 @@ function ConsultationsTable() {
       const response = await deleteAConsultation(id);
       if (response?.status === 200) {
         toast.success("Successfully deleted the consultation");
+        setIsDialogOpen(false);
       }
     } catch (error) {
       console.error(error);
@@ -135,6 +147,7 @@ function ConsultationsTable() {
       const response = await untrashAConsultation(id);
       if (response?.status === 200) {
         toast.success("Successfully Untrashed the consultation");
+        setIsDialogOpen(false);
       }
     } catch (error) {
       console.error(error);
@@ -160,7 +173,10 @@ function ConsultationsTable() {
           onChange={(e) => setSearchTerm(e.target.value)}
           className="max-w-sm"
         />
-        <Select value={itemsPerPage.toString()} onValueChange={(value) => setItemsPerPage(Number(value))}>
+        <Select
+          value={itemsPerPage.toString()}
+          onValueChange={(value) => setItemsPerPage(Number(value))}
+        >
           <SelectTrigger className="w-[120px]">
             <SelectValue placeholder="Show" />
           </SelectTrigger>
@@ -258,10 +274,12 @@ function ConsultationsTable() {
                     )}
                   </TableCell>
                   <TableCell className="py-3 px-4 text-center">
-                    <Dialog>
+                    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                       <DialogTrigger asChild>
                         <Button
-                          onClick={() => setSelectedConsultation(consultation)}
+                          onClick={() => {
+                            setSelectedConsultation(consultation);
+                          }}
                         >
                           View
                         </Button>

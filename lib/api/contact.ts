@@ -3,64 +3,25 @@ import { contactUsInstance, trashInstance } from "./axiosInstance";
 import axios from "axios";
 
 // Create new message
-export const createMessage = async (values:any) => {
+export const createMessage = async (values: any) => {
   try {
-    const userDetails = getUserDetails();
-    const uid = userDetails?.uid;
-    const accessToken = userDetails?.accessToken;
-
-    if (!uid || !accessToken) {
-      throw new Error("User not authenticated");
-    }
-
-    const response = await contactUsInstance.post(
-      "/createMessage",
-       values , // ✅ Directly sending required fields
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      }
-    );
-
+    const response = await contactUsInstance.post("/createMessage", values);
     return response.data;
   } catch (error) {
-    console.error("❌ Error sending message:", error);
-    throw error;
+    if (axios.isAxiosError(error) && error.response) {
+      throw error.response.data;
+    } else {
+      throw { message: "Failed to Create a message" };
+    }
   }
 };
 
-// // Get all messages
-// export const getAllMessages = async () => {
-//   try {
-//     const response = await apiInstance.get("/messages")
-//     return response.data
-//   } catch (error) {
-//     console.error("Failed to fetch messages:", error)
-//     throw error
-//   }
-// }
-
-// // Move message to trash
-// export const moveMessageToTrash = async (id: string) => {
-//   try {
-//     const response = await apiInstance.patch(`/messages/${id}/trash`, {
-//       victimUid: id,
-//     })
-//     return response.data
-//   } catch (error) {
-//     console.error("Failed to trash message:", error)
-//     throw error
-//   }
-// }
-
 // Get all Contact Us messages
 export async function getAllContactUsMessages(page = 1) {
-  const userDetails = getUserDetails();
-  const accessToken = userDetails?.accessToken;
-  
   try {
-    const response = await contactUsInstance.get(`/getAllMessages?page=${page}`);
+    const response = await contactUsInstance.get(
+      `/getAllMessages?page=${page}`
+    );
 
     if (response.status === 200) {
       return response.data;
@@ -74,25 +35,30 @@ export async function getAllContactUsMessages(page = 1) {
   }
 }
 
+export async function deleteAMessage(messageId: number) {
+  try {
+    const response = await contactUsInstance.delete(
+      `deleteMessage/${messageId}`
+    );
 
+    if (response.status === 200) {
+      return response.data;
+    }
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw error.response.data;
+    } else {
+      throw { message: "Failed to Delete message" };
+    }
+  }
+}
 
 // Trash a Contact Us message
 export async function trashAMessage(uid: string) {
-  const userDetails = getUserDetails();
-  const accessToken = userDetails?.accessToken;
-  if (!accessToken) {
-    throw new Error("Unauthorized: No access token found.");
-  }
   try {
-    const response = await contactUsInstance.patch( // Change GET to POST or PATCH
+    const response = await contactUsInstance.patch(
       "/moveMessageToTrash",
-      { victimUid: uid }, // Sending the request body
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-      }
+      { victimUid: uid } // Sending the request body
     );
 
     if (response.status === 200) {
@@ -107,26 +73,13 @@ export async function trashAMessage(uid: string) {
   }
 }
 
-
 //Untrash Contact Us message
 export async function UntrashAMessage(id: number) {
-  const userDetails = getUserDetails();
-  const accessToken = userDetails?.accessToken;
-  if (!accessToken) {
-    throw new Error("Unauthorized: No access token found.");
-  }
   try {
-    const response = await contactUsInstance.patch( 
+    const response = await contactUsInstance.patch(
       "/unTrashMessage",
-      { victimUid: id }, 
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-      }
+      { victimUid: id },
     );
-
     if (response.status === 200) {
       return response.data;
     }
@@ -134,7 +87,7 @@ export async function UntrashAMessage(id: number) {
     if (axios.isAxiosError(error) && error.response) {
       throw error.response.data;
     } else {
-      throw new Error("Failed to trash the message");
+      throw new Error("Failed to Un trash the message");
     }
   }
 }
@@ -142,29 +95,18 @@ export async function UntrashAMessage(id: number) {
 // Get trashed Contact Us Messages
 export async function getTrashedContactUs() {
   try {
-    const userDetails = getUserDetails();
-    const accessToken = userDetails?.accessToken;
-    if (!accessToken) {
-      throw new Error("User not authenticated");
-    }
-    const response = await trashInstance.get("/getTrashedMessages", {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
+  
+    const response = await trashInstance.get("/getTrashedMessages");
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
       console.error("Axios error:", error.response?.data || error.message);
       throw new Error(
-        error.response?.data?.message || "Failed to fetch trashed Contact Us Messages"
+        error.response?.data?.message ||
+          "Failed to fetch trashed Contact Us Messages"
       );
     } else {
-      console.error("Unexpected error:", error);
       throw new Error("An unexpected error occurred");
     }
   }
 }
-
-
-

@@ -55,7 +55,7 @@ export default function AdministratorSettingsPage() {
     username: "Enter your username",
     fullName: "Enter your full name",
     email: "Enter your email",
-    phoneNumber: "Enter your phnone number",
+    phone: "Enter your phnone number",
     address: "Enter your address",
   });
 
@@ -90,7 +90,7 @@ export default function AdministratorSettingsPage() {
       username: userDetails.username,
       fullName: userDetails.fullName,
       address: userDetails.address,
-      phone: userDetails?.phoneNumber,
+      phone: userDetails?.phone,
     },
   });
 

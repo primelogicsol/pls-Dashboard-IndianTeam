@@ -76,25 +76,32 @@ const MessagesPage = () => {
     }
   }, []);
 
-  // **Optimized Filtering with useMemo**
+  /* Filtered Contact Messages */
   const filteredMessages = useMemo(() => {
     const searchQuery = search.toLowerCase().trim();
+    const from = fromDate ? new Date(fromDate) : null;
+    const to = toDate ? new Date(toDate) : null;
+  
+    if (from) from.setHours(0, 0, 0, 0);
+    if (to) to.setHours(23, 59, 59, 999);
+  
     return messages.filter((msg) => {
       const messageDate = new Date(msg.createdAt);
+  
       const matchesSearch =
         msg.email.toLowerCase().includes(searchQuery) ||
         msg.firstName.toLowerCase().includes(searchQuery) ||
         msg.lastName.toLowerCase().includes(searchQuery) ||
         msg.from.toLowerCase().includes(searchQuery);
-
+  
       const matchesDate =
-        (!fromDate || messageDate >= new Date(fromDate)) &&
-        (!toDate || messageDate <= new Date(toDate));
-
+        (!from || messageDate >= from) && (!to || messageDate <= to);
+  
       return matchesSearch && matchesDate;
     });
   }, [messages, search, fromDate, toDate]);
 
+  
   if(!isAuthorized) return null;
 
   return (
@@ -132,7 +139,7 @@ const MessagesPage = () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="text-center font-bold">Name</TableHead>
+              <TableHead className="text-center font-bold whitespace-normal break-words max-w-[200px]">Name</TableHead>
               <TableHead className="text-center font-bold">Email</TableHead>
               <TableHead className="text-center font-bold">Message</TableHead>
               <TableHead className="text-center font-bold">Date</TableHead>
@@ -150,8 +157,8 @@ const MessagesPage = () => {
               </TableRow>
             ) : filteredMessages.length > 0 ? (
               filteredMessages.map((msg) => (
-                <TableRow key={msg.id}>
-                  <TableCell className="text-center">
+                <TableRow key={msg.id} >
+                  <TableCell className="text-center whitespace-normal break-words max-w-[200px]">
                     {msg.firstName} {msg.lastName}
                   </TableCell>
                   <TableCell className="text-center">{msg.email}</TableCell>
@@ -167,7 +174,7 @@ const MessagesPage = () => {
                           <DialogHeader>
                             <DialogTitle>Full Message</DialogTitle>
                           </DialogHeader>
-                          <p className="whitespace-pre-wrap">{msg.message}</p>
+                          <p className="whitespace-normal break-words max-w-[400px]">{msg.message}</p>
                         </DialogContent>
                       </Dialog>
                     ) : (
