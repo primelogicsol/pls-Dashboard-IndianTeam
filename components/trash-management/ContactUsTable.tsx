@@ -25,7 +25,7 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-import { getTrashedContactUs, UntrashAMessage } from "@/lib/api/contact"; // Adjust import if needed
+import { deleteAMessage, getTrashedContactUs, UntrashAMessage } from "@/lib/api/contact"; // Adjust import if needed
 import axios from "axios";
 import { getUserDetails } from "@/lib/api/storage";
 import { format } from "date-fns"; // Import date-fns
@@ -85,12 +85,13 @@ export default function MessagesTable() {
   async function handleDeleteMessage() {
     if (!deleteMessageId) return;
     try {
-      const userDetails = getUserDetails();
+      const userDetails = getUserDetails(); 
       const accessToken = userDetails?.accessToken;
 
-      await axios.delete(`/api/v1/trash/deleteMessage/${deleteMessageId}`, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
+      const response = await deleteAMessage(deleteMessageId);
+      if(response.status === 200) {
+        toast.success("Message deleted successfully");
+      }
 
       fetchTrashedMessages();
       setOpenDialog(false);
@@ -134,11 +135,10 @@ export default function MessagesTable() {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Email</TableHead>
-            <TableHead>Message</TableHead>
+            <TableHead className="text-center">Message</TableHead>
             <TableHead>Trashed By</TableHead>
             <TableHead>Trashed At</TableHead>
-            <TableHead>Actions</TableHead>
+            <TableHead className="text-center">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -151,13 +151,29 @@ export default function MessagesTable() {
           ) : (
             paginatedMessages.map((msg) => (
               <TableRow key={msg.id}>
-                <TableCell>{msg.email}</TableCell>
-                <TableCell className="max-w-[300px] truncate">
-                  {msg.message}
-                </TableCell>
+                
+                <TableCell className="text-center">
+                    {msg.message.length > 50 ? (
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button variant="link" className="text-blue-500">
+                            {msg.message.substring(0, 25)}...
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Full Message</DialogTitle>
+                          </DialogHeader>
+                          <p className="whitespace-normal break-words max-w-[400px]">{msg.message}</p>
+                        </DialogContent>
+                      </Dialog>
+                    ) : (
+                      msg.message
+                    )}
+                  </TableCell>
                 <TableCell>{msg.trashedBy}</TableCell>
                 <TableCell>{msg.trashedAt ? format(new Date(msg.trashedAt), "PPP") : "N/A"}</TableCell>
-                <TableCell>
+                <TableCell className="gap-2 flex justify-center items-center">
                   <Button variant="outline" onClick={() => handleRestoreMessage(msg.id)}>
                     Restore
                   </Button>
