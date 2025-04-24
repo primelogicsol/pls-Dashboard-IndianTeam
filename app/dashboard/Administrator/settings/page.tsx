@@ -72,7 +72,7 @@ export default function AdministratorSettingsPage() {
         username: data.username,
         fullName: data.fullName,
         address: data.address,
-        phone: data.phoneNumber,
+        phone: data.phone,
       });
 
       emailForm.reset({ email: data.email });
