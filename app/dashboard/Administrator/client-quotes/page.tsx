@@ -55,15 +55,20 @@ export default function QuotesPage() {
   const { isAuthorized } = useAuth(["ADMIN", "MODERATOR"]);
 
   useEffect(() => {
-    fetchQuotes().then((data) => {
+    fetchQuotes().then((data: any) => {
       if (Array.isArray(data)) {
-        setQuotes(data);
+        const sortedData = data.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        setQuotes(sortedData);
         setFilteredQuotes(data);
       } else {
         console.error("Unexpected data format:", data);
       }
     });
   }, []);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [entries]);
 
   const fetchQuotes = async () => {
     try {
@@ -111,16 +116,6 @@ export default function QuotesPage() {
   return (
     <Suspense fallback={<p className="text-center p-4">Loading quotes...</p>}>
       <div className="p-6 bg-white shadow-lg rounded-lg">
-        {/* <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-semibold">Quotes</h2>
-          <Button
-            onClick={() =>
-              router.push("/dashboard/Administrator/client-quotes/create")
-            }
-          >
-            <PlusCircle className="mr-2 h-5 w-5" /> Create New Quote
-          </Button>
-        </div> */}
         <div className="flex justify-between items-center mb-4">
           <Input
             placeholder="Search..."
@@ -161,7 +156,7 @@ export default function QuotesPage() {
                   <TableCell>{quote.name}</TableCell>
                   <TableCell>{quote.email}</TableCell>
                   <TableCell>{quote.phone}</TableCell>
-                  <TableCell>{quote.address}</TableCell>
+                  <TableCell className="whitespace-normal break-words max-w-[200px]">{quote.address}</TableCell>
                   <TableCell className="flex space-x-2">
                     <Dialog>
                       <DialogTrigger asChild>
