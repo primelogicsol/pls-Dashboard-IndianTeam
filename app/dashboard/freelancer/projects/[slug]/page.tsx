@@ -47,6 +47,7 @@ interface Project {
   projectType: string;
   projectStatus: string;
   selectedFreelancers: Freelancer[];
+  interestedFreelancers: Freelancer[];
   clientWhoPostedThisProject: Client;
   projectSlug: string;
   createdAt: string;
@@ -69,6 +70,8 @@ export default function ProjectDetailPage() {
     fetchProjectDetails();
     setLoading(false);
   }, []);
+  
+  
 
   const fetchProjectDetails = async () => {
     if (typeof slug === "string") {
@@ -91,6 +94,10 @@ export default function ProjectDetailPage() {
       toast.error("Invalid project slug");
     }
   };
+
+  const isInterested = project?.interestedFreelancers?.some(
+    (freelancer: any) => freelancer.uid === uid
+  );
 
   // Get status badge color
   const getStatusColor = (status: string) => {
@@ -307,7 +314,7 @@ export default function ProjectDetailPage() {
                   </Button>
                   <Dialog>
                     <DialogTrigger asChild>
-                      <Button variant="destructive">Remove Interest</Button>
+                      <Button variant="destructive" disabled={!isInterested}>Remove Interest</Button>
                     </DialogTrigger>
 
                     <DialogContent>

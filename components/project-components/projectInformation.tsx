@@ -14,7 +14,7 @@ import {
   TUPDATE_PROJECT,
 } from "@/types/project";
 import { Progress } from "../ui/progress";
-import { CalendarIcon, CheckCircle, Edit, Save, X } from "lucide-react";
+import { CalendarIcon, CheckCircle, Edit, Info, Save, X } from "lucide-react";
 import { Button } from "../ui/button";
 import { useEffect, useState } from "react";
 import * as z from "zod";
@@ -45,6 +45,7 @@ import { Textarea } from "../ui/textarea";
 import { updateProjectBySlug } from "@/lib/api/projects";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 // Get difficulty badge color
 const getDifficultyColor = (level: TDIFFICULTYLEVEL) => {
@@ -92,56 +93,62 @@ export default function ProjectInformation({
   const formSchema = z.object({
     title: z
       .string()
-      .transform(val => val?.trim() === "" ? undefined : val)
+      .transform((val) => (val?.trim() === "" ? undefined : val))
       .optional()
-      .refine(val => !val || val.length >= 5, {
+      .refine((val) => !val || val.length >= 5, {
         message: "Title must be at least 5 characters",
       }),
-  
+
     detail: z
       .string()
-      .transform(val => val?.trim() === "" ? undefined : val)
+      .transform((val) => (val?.trim() === "" ? undefined : val))
       .optional()
-      .refine(val => !val || val.length >= 20, {
+      .refine((val) => !val || val.length >= 20, {
         message: "Detail must be at least 20 characters",
       }),
-  
+
     projectType: z.enum(["INHOUSE", "OUTSOURCE"]).optional(),
-  
+
     niche: z
       .string()
-      .transform(val => val?.trim() === "" ? undefined : val)
+      .transform((val) => (val?.trim() === "" ? undefined : val))
       .optional()
-      .refine(val => !val || val.length >= 2, {
+      .refine((val) => !val || val.length >= 2, {
         message: "Niche is required and must be at least 2 characters",
       }),
-  
+
     bounty: z
       .union([
-        z.coerce.number().positive({ message: "Bounty must be a positive number" }),
+        z.coerce
+          .number()
+          .positive({ message: "Bounty must be a positive number" }),
         z.literal(undefined),
       ])
       .optional(),
-  
+
     deadline: z
       .string()
-      .transform(val => val?.trim() === "" ? undefined : val)
+      .transform((val) => (val?.trim() === "" ? undefined : val))
       .optional(),
-  
-    projectStatus: z.enum(["PENDING", "CANCELLED", "ONGOING", "COMPLETED"]).optional(),
-  
+
+    projectStatus: z
+      .enum(["PENDING", "CANCELLED", "ONGOING", "COMPLETED"])
+      .optional(),
+
     progressPercentage: z
       .union([
-        z.coerce.number().min(0, { message: "Min 0%" }).max(100, { message: "Max 100%" }),
+        z.coerce
+          .number()
+          .min(0, { message: "Min 0%" })
+          .max(100, { message: "Max 100%" }),
         z.literal(undefined),
       ])
       .optional(),
-  
+
     isDeadlineNeedToBeExtend: z.boolean().optional(),
-  
+
     difficultyLevel: z.enum(["EASY", "MEDIUM", "HARD"]).optional(),
   });
-  
 
   // Initialize form with project data
   const form = useForm<TUPDATE_PROJECT>({
@@ -187,7 +194,7 @@ export default function ProjectInformation({
         toast.success("Successfully Updated the details");
         setIsEditing(false);
       }
-      router.push("/dashboard/Administrator/project-status")
+      router.push("/dashboard/Administrator/project-status");
     } catch (error: any) {
       console.log(error);
       toast.error(error.message || "An Error Occured");
@@ -494,9 +501,19 @@ export default function ProjectInformation({
                   </p>
                 </div>
                 <div>
-                  <h3 className="text-sm font-medium text-muted-foreground">
+                  <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-1">
                     Project Type
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Info className="w-4 h-4 text-muted-foreground cursor-pointer" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        Outsource projects are visible to freelancers and
+                        clients.
+                      </TooltipContent>
+                    </Tooltip>
                   </h3>
+
                   <Badge variant="outline" className="mt-1">
                     {project?.projectType === "INHOUSE"
                       ? "In-house"
@@ -520,9 +537,20 @@ export default function ProjectInformation({
                 </div>
 
                 <div>
-                  <h3 className="text-sm font-medium text-muted-foreground">
-                    Status
-                  </h3>
+                  <div className="flex items-center justify-start gap-1">
+                    <h3 className="text-sm font-medium text-muted-foreground">
+                      Status
+                    </h3>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Info className="w-4 h-4 text-muted-foreground cursor-pointer" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        Project Status should be in pending state in order to be
+                        visible for freelancers to apply.
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
                   <Badge
                     className={`mt-1 ${
                       project?.projectStatus
