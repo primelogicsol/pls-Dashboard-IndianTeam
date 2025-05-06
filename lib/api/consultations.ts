@@ -4,16 +4,9 @@ import { getUserDetails } from "./storage";
 
 //Get all consultations
 export async function getAllConsultations() {
-  const userDetails = getUserDetails();
-  const accessToken = userDetails?.accessToken;
   try {
     const response = await apiInstance.get(
-      "/consultation/getAllRequestedConsultations",
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      }
+      "/consultation/getAllRequestedConsultations"
     );
     if (response.status === 200) {
       return response.data;
@@ -29,20 +22,11 @@ export async function getAllConsultations() {
 
 // Accept a consultation
 export async function acceptAConsultation(id: string) {
-  const userDetails = getUserDetails();
-  if (!userDetails || !userDetails.accessToken) {
-    throw { message: "Unauthorized: No access token found." };
-  }
-  const accessToken = userDetails.accessToken;
   try {
     const response = await apiInstance.patch(
       `/consultation/acceptRequestedConsultation/${id}`,
       {}, // Empty body
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      }
+      
     );
     if (response.status === 200) {
       return response.data;
@@ -59,20 +43,11 @@ export async function acceptAConsultation(id: string) {
 
 // Reject consultation
 export async function rejectAConsultation(id: string) {
-  const userDetails = getUserDetails();
-  if (!userDetails || !userDetails.accessToken) {
-    throw { message: "Unauthorized: No access token found." };
-  }
-  const accessToken = userDetails.accessToken;
+  
   try {
     const response = await apiInstance.patch(
       `/consultation/rejectRequestedConsultation/${id}`,
       {}, // Empty body
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      }
     );
     if (response.status === 200) {
       return response.data;
@@ -90,20 +65,11 @@ export async function rejectAConsultation(id: string) {
 // Trash a consultation
 export async function trashAConsultation(id: string) {
   const userDetails = getUserDetails();
-  if (!userDetails || !userDetails.accessToken) {
-    throw { message: "Unauthorized: No access token found." };
-  }
-  const accessToken = userDetails.accessToken;
   const uid = userDetails.uid;
   try {
     const response = await apiInstance.patch(
       `/consultation/trashRequestedConsultation/${id}`,
       { uid },
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      }
     );
     if (response.status === 200) {
       return response.data;
@@ -156,3 +122,21 @@ export async function deleteAConsultation(id: string) {
   }
 }
 
+export async function getTrashedConsultations() {
+  try {
+    const response = await apiInstance.get("/trash/getTrashedConsultations");
+    if(response?.status === 200) {
+      return response?.data;
+    }
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error("Axios error:", error.response?.data || error.message);
+      throw new Error(
+        error.response?.data?.message || "Failed to Fetch trashed consultations"
+      );
+    } else {
+      console.error("Unexpected error:", error);
+      throw new Error("An unexpected error occurred");
+    }
+  }
+}
