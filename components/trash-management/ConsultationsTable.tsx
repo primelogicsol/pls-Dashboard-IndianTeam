@@ -16,7 +16,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
-import { getTrashedConsultations } from "@/lib/api/projects";
+import { getTrashedConsultations } from "@/lib/api/consultations";
 import { Consultation } from "@/types/consultation";
 import {
   Dialog,

@@ -1,6 +1,6 @@
 import axios from "axios";
 import { authInstance } from "./axiosInstance";
-import { getUserDetails, setUserDetails } from "./storage";
+import { getUserDetails, removeUserDetails, setUserDetails } from "./storage";
 
 const API_BASE = process.env.NEXT_PUBLIC_PLS_AUTH;
 
@@ -86,7 +86,7 @@ export const login = async (username: string, password: string) => {
 };
 
 export const logout = () => {
-  localStorage.removeItem("userDetails");
+  removeUserDetails(); 
 };
 
 export async function sendOtp(email: string) {

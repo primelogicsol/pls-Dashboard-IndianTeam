@@ -23,6 +23,7 @@ export async function getAllProjects(page: number = 1) {
 }
 
 export async function getAllProjectsWithThierClient(page: number = 1) {
+
   try {
     const userDetails = getUserDetails();
     const accessToken = userDetails?.accessToken;
@@ -314,24 +315,7 @@ export const getProjectsForSelectFreelancer = async (
   }
 };
 
-export async function getTrashedConsultations() {
-  try {
-    const response = await apiInstance.get("/trash/getTrashedConsultations");
-    if(response?.status === 200) {
-      return response?.data;
-    }
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      console.error("Axios error:", error.response?.data || error.message);
-      throw new Error(
-        error.response?.data?.message || "Failed to Fetch trashed consultations"
-      );
-    } else {
-      console.error("Unexpected error:", error);
-      throw new Error("An unexpected error occurred");
-    }
-  }
-}
+
 
 export async function createAProject(data: any) {
   try {
