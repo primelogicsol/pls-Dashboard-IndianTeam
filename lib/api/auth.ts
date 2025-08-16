@@ -60,7 +60,7 @@ export const login = async (username: string, password: string) => {
 
       // Decode the JWT token to get the role and other details
       const decodedToken = JSON.parse(atob(accessToken.split(".")[1]));
-
+      
       // Log the decoded token to verify its contents
       console.log("Decoded Token:", decodedToken);
 

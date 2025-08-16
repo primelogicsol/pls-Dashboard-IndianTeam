@@ -32,28 +32,12 @@ import {
 } from "@/lib/api/freelancers";
 import { toast } from "sonner";
 import { Search } from "lucide-react";
+import { Data, FreelancersData } from "@/types/freelancers";
 
-interface Request {
-  id: number;
-  name: string;
-  email: string;
-  phone: string;
-  niche: string;
-  address: string;
-  detail: string;
-  yourPortfolio: string;
-  yourTopProject1: string;
-  yourTopProject2: string;
-  yourTopProject3: string;
-  isAccepted: boolean;
-  createdAt: string;
-  yearOfExperience: string;
-  country: string;
-}
 
 export default function FreelancerRequests() {
-  const [requests, setRequests] = useState<Request[]>([]);
-  const [selectedRequest, setSelectedRequest] = useState<Request | null>(null);
+  const [requests, setRequests] = useState<Data[]>([]);
+  const [selectedRequest, setSelectedRequest] = useState<Data | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [entriesPerPage, setEntriesPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
@@ -68,8 +52,9 @@ export default function FreelancerRequests() {
   const fetchFreelancerRequests = async () => {
     try {
       const response = await getAllFreelancersRequest();
+        
       if (response?.data && Array.isArray(response.data)) {
-        setRequests(response.data);
+        setRequests(response.data as Data[]);
       } else {
         setRequests([]);
       }
@@ -96,7 +81,7 @@ export default function FreelancerRequests() {
     try {
       const response = await TrashAFreeLancer(id);
       if (response.status === 200) {
-        setRequests((prev) => prev.filter((request) => request.id !== id));
+        setRequests((prev) => prev.filter((request) => String(request?.id) !== String(id)));
         toast.success("Freelancer Request Trashed Successfully");
       }
     } catch (error) {
@@ -112,7 +97,7 @@ export default function FreelancerRequests() {
       const response = await AcceptFreeLancerRequests(id);
       if (response.status === 200) {
         toast.success("Freelancer accepted successfully");
-        setRequests((prev) => prev.filter((request) => request.id !== id));
+        setRequests((prev) => prev.filter((request) => String(request?.id) !== String(id)));
       }
     } catch (error) {
       console.error("Error accepting freelancer:", error);
@@ -123,12 +108,12 @@ export default function FreelancerRequests() {
 
   const filteredRequests = (requests || []).filter(
     (request) =>
-      request.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      request.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      request.phone.includes(searchTerm) ||
-      request.niche.toLowerCase().includes(searchTerm.toLowerCase())
+      request?.userId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      request?.whoYouAre?.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      request?.whoYouAre?.phone.includes(searchTerm) ||
+      request?.whoYouAre?.fullName.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
+  
   const indexOfLastEntry = currentPage * entriesPerPage;
   const indexOfFirstEntry = indexOfLastEntry - entriesPerPage;
   const currentEntries = filteredRequests.slice(
@@ -174,7 +159,6 @@ export default function FreelancerRequests() {
             <TableHead>Name</TableHead>
             <TableHead>Email</TableHead>
             <TableHead>Phone</TableHead>
-            <TableHead>Niche</TableHead>
             <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -182,10 +166,9 @@ export default function FreelancerRequests() {
           {currentEntries.length > 0 ? (
             currentEntries.map((request) => (
               <TableRow key={request.id}>
-                <TableCell>{request.name}</TableCell>
-                <TableCell>{request.email}</TableCell>
-                <TableCell>{request.phone}</TableCell>
-                <TableCell>{request.niche}</TableCell>
+                <TableCell>{request?.whoYouAre?.fullName}</TableCell>
+                <TableCell>{request?.whoYouAre?.email}</TableCell>
+                <TableCell>{request?.whoYouAre?.phone}</TableCell>
                 <TableCell className="space-x-2">
                   <Dialog>
                     <DialogTrigger asChild>
@@ -204,33 +187,22 @@ export default function FreelancerRequests() {
                       {selectedRequest && (
                         <div className="space-y-2">
                           <p>
-                            <strong>Name:</strong> {selectedRequest.name}
+                            <strong>Name:</strong> {selectedRequest?.whoYouAre?.fullName}
                           </p>
                           <p>
-                            <strong>Email:</strong> {selectedRequest.email}
+                            <strong>Email:</strong> {selectedRequest?.whoYouAre?.email}
                           </p>
                           <p>
-                            <strong>Phone:</strong> {selectedRequest.phone}
+                            <strong>Phone:</strong> {selectedRequest?.whoYouAre?.phone}
                           </p>
-                          <p>
-                            <strong>Address:</strong> {selectedRequest.address}
-                          </p>
-                          <p>
-                            <strong>Detail:</strong> {selectedRequest.detail}
-                          </p>
-                          <p>
-                            <strong>Year of Experience:</strong>{" "}
-                            {selectedRequest.yearOfExperience
-                              ? selectedRequest.yearOfExperience
-                              : "N/A"}
-                          </p>
+                     
                           <p>
                             <strong>Country:</strong>{" "}
-                            {selectedRequest.country
-                              ? selectedRequest.country
+                            {selectedRequest?.whoYouAre?.country
+                              ? selectedRequest?.whoYouAre?.country
                               : "N/A"}
                           </p>
-                          <p>
+                          {/* <p>
                             <strong>Portfolio:</strong>{" "}
                             <a
                               href={selectedRequest.yourPortfolio}
@@ -240,8 +212,8 @@ export default function FreelancerRequests() {
                             >
                               {selectedRequest.yourPortfolio}
                             </a>
-                          </p>
-                          <p>
+                          </p> */}
+                          {/* <p>
                             <strong>Projects:</strong>
                           </p>
                           <ul className="list-disc ml-6">
@@ -275,16 +247,16 @@ export default function FreelancerRequests() {
                                 {selectedRequest.yourTopProject3}
                               </a>
                             </li>
-                          </ul>
+                          </ul> */}
 
                           <Button
                             variant="default"
                             size="sm"
                             className="mt-4"
-                            onClick={() => acceptFreelancer(selectedRequest.id)}
-                            disabled={!!loading[selectedRequest.id]}
+                            onClick={() => acceptFreelancer(Number(selectedRequest?.id))}
+                            disabled={!!loading[Number(selectedRequest?.id)]}
                           >
-                            {loading[selectedRequest.id] || "Accept Freelancer"}
+                            {loading[Number(selectedRequest?.id)] || "Accept Freelancer"}
                           </Button>
                         </div>
                       )}
@@ -293,10 +265,10 @@ export default function FreelancerRequests() {
                   <Button
                     variant="destructive"
                     size="sm"
-                    onClick={() => handleTrash(request.id)}
-                    disabled={!!loading[request.id]}
+                    onClick={() => handleTrash(Number(request.id))}
+                    disabled={!!loading[Number(request.id)]}
                   >
-                    {loading[request.id] || "Trash"}
+                    {loading[Number(request.id)] || "Trash"}
                   </Button>
                 </TableCell>
               </TableRow>

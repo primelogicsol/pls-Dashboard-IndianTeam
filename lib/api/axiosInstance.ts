@@ -101,6 +101,7 @@ const createAxiosInstance = (baseURL: string) => {
     instance.interceptors.request.use(
         async (config) => {
             const userDetails = getUserDetails();
+            // console.log("userDetails", userDetails);
             if (userDetails?.accessToken) {
                 if (isTokenExpired(userDetails.accessToken)) {
                     console.warn("⚠️ Token expired, refreshing...");
@@ -109,6 +110,7 @@ const createAxiosInstance = (baseURL: string) => {
                         config.headers.Authorization = `Bearer ${newAccessToken}`;
                     }
                 } else {
+                    console.log("userDetails.accessToken", userDetails.accessToken);
                     config.headers.Authorization = `Bearer ${userDetails.accessToken}`;
                 }
             }
