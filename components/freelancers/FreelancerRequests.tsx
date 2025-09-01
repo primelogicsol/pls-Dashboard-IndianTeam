@@ -1,14 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -17,43 +16,28 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogTrigger,
-  DialogContent,
-  DialogTitle,
-  DialogHeader,
-} from "@/components/ui/dialog";
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   AcceptFreeLancerRequests,
   getAllFreelancersRequest,
   TrashAFreeLancer,
 } from "@/lib/api/freelancers";
-import { toast } from "sonner";
+import { Data } from "@/types/freelancers";
 import { Search } from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
-interface Request {
-  id: number;
-  name: string;
-  email: string;
-  phone: string;
-  niche: string;
-  address: string;
-  detail: string;
-  yourPortfolio: string;
-  yourTopProject1: string;
-  yourTopProject2: string;
-  yourTopProject3: string;
-  isAccepted: boolean;
-  createdAt: string;
-  yearOfExperience: string;
-  country: string;
-}
 
 export default function FreelancerRequests() {
-  const [requests, setRequests] = useState<Request[]>([]);
-  const [selectedRequest, setSelectedRequest] = useState<Request | null>(null);
+  const [requests, setRequests] = useState<Data[]>([]);
+  const [selectedRequest, setSelectedRequest] = useState<Data | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [entriesPerPage, setEntriesPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
@@ -68,8 +52,9 @@ export default function FreelancerRequests() {
   const fetchFreelancerRequests = async () => {
     try {
       const response = await getAllFreelancersRequest();
+        
       if (response?.data && Array.isArray(response.data)) {
-        setRequests(response.data);
+        setRequests(response.data as Data[]);
       } else {
         setRequests([]);
       }
@@ -96,7 +81,7 @@ export default function FreelancerRequests() {
     try {
       const response = await TrashAFreeLancer(id);
       if (response.status === 200) {
-        setRequests((prev) => prev.filter((request) => request.id !== id));
+        setRequests((prev) => prev.filter((request) => String(request?.id) !== String(id)));
         toast.success("Freelancer Request Trashed Successfully");
       }
     } catch (error) {
@@ -112,7 +97,7 @@ export default function FreelancerRequests() {
       const response = await AcceptFreeLancerRequests(id);
       if (response.status === 200) {
         toast.success("Freelancer accepted successfully");
-        setRequests((prev) => prev.filter((request) => request.id !== id));
+        setRequests((prev) => prev.filter((request) => String(request?.id) !== String(id)));
       }
     } catch (error) {
       console.error("Error accepting freelancer:", error);
@@ -123,12 +108,12 @@ export default function FreelancerRequests() {
 
   const filteredRequests = (requests || []).filter(
     (request) =>
-      request.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      request.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      request.phone.includes(searchTerm) ||
-      request.niche.toLowerCase().includes(searchTerm.toLowerCase())
+      request?.userId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      request?.whoYouAre?.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      request?.whoYouAre?.phone.includes(searchTerm) ||
+      request?.whoYouAre?.fullName.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
+  
   const indexOfLastEntry = currentPage * entriesPerPage;
   const indexOfFirstEntry = indexOfLastEntry - entriesPerPage;
   const currentEntries = filteredRequests.slice(
@@ -174,7 +159,6 @@ export default function FreelancerRequests() {
             <TableHead>Name</TableHead>
             <TableHead>Email</TableHead>
             <TableHead>Phone</TableHead>
-            <TableHead>Niche</TableHead>
             <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -182,10 +166,9 @@ export default function FreelancerRequests() {
           {currentEntries.length > 0 ? (
             currentEntries.map((request) => (
               <TableRow key={request.id}>
-                <TableCell>{request.name}</TableCell>
-                <TableCell>{request.email}</TableCell>
-                <TableCell>{request.phone}</TableCell>
-                <TableCell>{request.niche}</TableCell>
+                <TableCell>{request?.whoYouAre?.fullName}</TableCell>
+                <TableCell>{request?.whoYouAre?.email}</TableCell>
+                <TableCell>{request?.whoYouAre?.phone}</TableCell>
                 <TableCell className="space-x-2">
                   <Dialog>
                     <DialogTrigger asChild>
@@ -202,89 +185,110 @@ export default function FreelancerRequests() {
                         <DialogTitle>Request Details</DialogTitle>
                       </DialogHeader>
                       {selectedRequest && (
-                        <div className="space-y-2">
-                          <p>
-                            <strong>Name:</strong> {selectedRequest.name}
-                          </p>
-                          <p>
-                            <strong>Email:</strong> {selectedRequest.email}
-                          </p>
-                          <p>
-                            <strong>Phone:</strong> {selectedRequest.phone}
-                          </p>
-                          <p>
-                            <strong>Address:</strong> {selectedRequest.address}
-                          </p>
-                          <p>
-                            <strong>Detail:</strong> {selectedRequest.detail}
-                          </p>
-                          <p>
-                            <strong>Year of Experience:</strong>{" "}
-                            {selectedRequest.yearOfExperience
-                              ? selectedRequest.yearOfExperience
-                              : "N/A"}
-                          </p>
-                          <p>
-                            <strong>Country:</strong>{" "}
-                            {selectedRequest.country
-                              ? selectedRequest.country
-                              : "N/A"}
-                          </p>
-                          <p>
-                            <strong>Portfolio:</strong>{" "}
-                            <a
-                              href={selectedRequest.yourPortfolio}
-                              className="text-blue-500"
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              {selectedRequest.yourPortfolio}
-                            </a>
-                          </p>
-                          <p>
-                            <strong>Projects:</strong>
-                          </p>
-                          <ul className="list-disc ml-6">
-                            <li>
-                              <a
-                                href={selectedRequest.yourTopProject1}
-                                className="text-blue-500"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                              >
-                                {selectedRequest.yourTopProject1}
-                              </a>
-                            </li>
-                            <li>
-                              <a
-                                href={selectedRequest.yourTopProject2}
-                                className="text-blue-500"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                              >
-                                {selectedRequest.yourTopProject2}
-                              </a>
-                            </li>
-                            <li>
-                              <a
-                                href={selectedRequest.yourTopProject3}
-                                className="text-blue-500"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                              >
-                                {selectedRequest.yourTopProject3}
-                              </a>
-                            </li>
-                          </ul>
-
+                        <div className="space-y-2 text-sm">
+                          <p><strong>Name:</strong> {selectedRequest.whoYouAre?.fullName}</p>
+                          <p><strong>Email:</strong> {selectedRequest.whoYouAre?.email}</p>
+                          <p><strong>Phone:</strong> {selectedRequest.whoYouAre?.phone || "N/A"}</p>
+                          <p><strong>Country:</strong> {selectedRequest.whoYouAre?.country || "N/A"}</p>
+                          <p><strong>Time Zone:</strong> {selectedRequest.whoYouAre?.timeZone || "N/A"}</p>
+                          <div>
+                            <strong>Professional Links:</strong>
+                            <ul className="ml-4 list-disc">
+                              {selectedRequest.whoYouAre?.professionalLinks && Object.entries(selectedRequest.whoYouAre.professionalLinks).map(([key, value]) => (
+                                <li key={key}><strong>{key}:</strong> <a href={value} target="_blank" rel="noopener noreferrer" className="text-blue-500">{value}</a></li>
+                              ))}
+                            </ul>
+                          </div>
+                          <p><strong>Primary Domain:</strong> {selectedRequest.coreRole?.primaryDomain}</p>
+                          <div>
+                            <strong>Elite Skills:</strong>
+                            <ul className="ml-4 list-disc">
+                              {selectedRequest.eliteSkillCards?.selectedSkills?.map((skill: string) => (
+                                <li key={skill}>{skill}</li>
+                              ))}
+                            </ul>
+                          </div>
+                          <div>
+                            <strong>Toolstack Proficiency:</strong>
+                            <ul className="ml-4 list-disc">
+                              {selectedRequest.toolstackProficiency?.selectedTools?.map((toolcat: any, idx: number) => (
+                                <li key={idx}><strong>{toolcat.category}:</strong> {toolcat.tools.join(", ")}</li>
+                              ))}
+                            </ul>
+                          </div>
+                          <div>
+                            <strong>Domain Experience:</strong>
+                            <ul className="ml-4 list-disc">
+                              {selectedRequest.domainExperience?.roles?.map((role: any, idx: number) => (
+                                <li key={idx}>{role.title} ({role.years} years)</li>
+                              ))}
+                            </ul>
+                          </div>
+                          <div>
+                            <strong>Industry Experience:</strong>
+                            <ul className="ml-4 list-disc">
+                              {selectedRequest.industryExperience?.selectedIndustries?.map((industry: string) => (
+                                <li key={industry}>{industry}</li>
+                              ))}
+                            </ul>
+                          </div>
+                          <div>
+                            <strong>Availability:</strong>
+                            <ul className="ml-4 list-disc">
+                              <li><strong>Weekly Commitment:</strong> {selectedRequest.availabilityWorkflow?.weeklyCommitment} hrs</li>
+                              <li><strong>Working Hours:</strong> {selectedRequest.availabilityWorkflow?.workingHours?.join(", ")}</li>
+                              <li><strong>Collaboration Tools:</strong> {selectedRequest.availabilityWorkflow?.collaborationTools?.join(", ")}</li>
+                              <li><strong>Team Style:</strong> {selectedRequest.availabilityWorkflow?.teamStyle}</li>
+                              <li><strong>Screen Sharing:</strong> {selectedRequest.availabilityWorkflow?.screenSharing}</li>
+                              <li><strong>Exceptions:</strong> {selectedRequest.availabilityWorkflow?.availabilityExceptions || "None"}</li>
+                            </ul>
+                          </div>
+                          <div>
+                            <strong>Soft Skills:</strong>
+                            <ul className="ml-4 list-disc">
+                              <li><strong>Collaboration Style:</strong> {selectedRequest.softSkills?.collaborationStyle}</li>
+                              <li><strong>Communication Frequency:</strong> {selectedRequest.softSkills?.communicationFrequency}</li>
+                              <li><strong>Conflict Resolution:</strong> {selectedRequest.softSkills?.conflictResolution}</li>
+                              <li><strong>Languages:</strong> {selectedRequest.softSkills?.languages?.join(", ")}</li>
+                              <li><strong>Team vs Solo:</strong> {selectedRequest.softSkills?.teamVsSolo}</li>
+                            </ul>
+                          </div>
+                          <div>
+                            <strong>Certifications:</strong>
+                            <ul className="ml-4 list-disc">
+                              {selectedRequest.certifications?.certificates?.map((cert: any, idx: number) => (
+                                <li key={idx}><a href={cert.url} target="_blank" rel="noopener noreferrer" className="text-blue-500">{cert.name}</a></li>
+                              ))}
+                            </ul>
+                          </div>
+                          <div>
+                            <strong>Project Quoting:</strong>
+                            <ul className="ml-4 list-disc">
+                              <li><strong>Compensation Preference:</strong> {selectedRequest.projectQuoting?.compensationPreference}</li>
+                              <li><strong>Small Project Price:</strong> ${selectedRequest.projectQuoting?.smallProjectPrice}</li>
+                              <li><strong>Mid Project Price:</strong> ${selectedRequest.projectQuoting?.midProjectPrice}</li>
+                              <li><strong>Long Term Price:</strong> ${selectedRequest.projectQuoting?.longTermPrice}</li>
+                              <li><strong>Milestone Terms:</strong> {selectedRequest.projectQuoting?.milestoneTerms}</li>
+                              <li><strong>Will Submit Proposals:</strong> {selectedRequest.projectQuoting?.willSubmitProposals}</li>
+                            </ul>
+                          </div>
+                          <div>
+                            <strong>Legal Agreements:</strong>
+                            <ul className="ml-4 list-disc">
+                              {selectedRequest.legalAgreements?.agreements?.map((agreement: any) => (
+                                <li key={agreement.id}><strong>{agreement.id}:</strong> {agreement.accepted ? "Accepted" : "Not Accepted"}</li>
+                              ))}
+                              <li><strong>Work Authorization ID:</strong> {selectedRequest.legalAgreements?.workAuthorizationId}</li>
+                            </ul>
+                          </div>
                           <Button
                             variant="default"
                             size="sm"
                             className="mt-4"
-                            onClick={() => acceptFreelancer(selectedRequest.id)}
-                            disabled={!!loading[selectedRequest.id]}
+                            onClick={() => acceptFreelancer(Number(selectedRequest?.id))}
+                            disabled={!!loading[Number(selectedRequest?.id)]}
                           >
-                            {loading[selectedRequest.id] || "Accept Freelancer"}
+                            {loading[Number(selectedRequest?.id)] || "Accept Freelancer"}
                           </Button>
                         </div>
                       )}
@@ -293,10 +297,10 @@ export default function FreelancerRequests() {
                   <Button
                     variant="destructive"
                     size="sm"
-                    onClick={() => handleTrash(request.id)}
-                    disabled={!!loading[request.id]}
+                    onClick={() => handleTrash(Number(request.id))}
+                    disabled={!!loading[Number(request.id)]}
                   >
-                    {loading[request.id] || "Trash"}
+                    {loading[Number(request.id)] || "Trash"}
                   </Button>
                 </TableCell>
               </TableRow>

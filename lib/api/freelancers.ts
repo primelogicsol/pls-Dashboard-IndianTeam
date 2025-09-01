@@ -1,12 +1,14 @@
 import axios from "axios";
 import { apiInstance } from "./axiosInstance";
 import { TKPIRANK } from "@/types/project";
+import { FreelancersData } from "@/types/freelancers";
 
 
 // Get all FreeLancers Request
 export async function getAllFreelancersRequest() {
   try {
-    const response = await apiInstance.get("/freelancer/getAllFreeLancerRequest");
+    const response = await apiInstance.get<FreelancersData>("/freelancer/getAllFreeLancerRequestV2");
+    console.log('data', response.data)
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {

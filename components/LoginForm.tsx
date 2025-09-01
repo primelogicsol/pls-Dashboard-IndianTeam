@@ -41,6 +41,8 @@ export function LoginForm({
       const response = await login(username, password);
 
       if (response) {
+
+        // const hardCodeEmail = response.data.username === "junaidkhan123"
         setUserDetails(response); // Store user in cookies
 
         switch (response.role) {
