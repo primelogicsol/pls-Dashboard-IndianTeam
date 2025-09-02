@@ -185,7 +185,7 @@ export default function FreelancerRequests() {
                         <DialogTitle>Request Details</DialogTitle>
                       </DialogHeader>
                       {selectedRequest && (
-                        <div className="space-y-2 text-sm">
+                        <div className="space-y-2 text-sm max-h-[70vh] overflow-y-auto pr-2">
                           <p><strong>Name:</strong> {selectedRequest.whoYouAre?.fullName}</p>
                           <p><strong>Email:</strong> {selectedRequest.whoYouAre?.email}</p>
                           <p><strong>Phone:</strong> {selectedRequest.whoYouAre?.phone || "N/A"}</p>
