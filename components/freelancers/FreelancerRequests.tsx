@@ -41,7 +41,7 @@ export default function FreelancerRequests() {
   const [searchTerm, setSearchTerm] = useState("");
   const [entriesPerPage, setEntriesPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
-  const [loading, setLoading] = useState<{ [key: number]: string | undefined }>(
+  const [loading, setLoading] = useState<{ [key: string]: string | undefined }>(
     {}
   );
 
@@ -91,7 +91,13 @@ export default function FreelancerRequests() {
     setLoading((prev) => ({ ...prev, [id]: undefined }));
   };
 
-  const acceptFreelancer = async (id: number) => {
+  const acceptFreelancer = async (id: string) => {
+    console.log(id);
+
+    if (!id ) {
+      toast.error("Invalid freelancer ID. Please try again.");
+      return
+    }
     setLoading((prev) => ({ ...prev, [id]: "Accepting..." }));
     try {
       const response = await AcceptFreeLancerRequests(id);
@@ -276,6 +282,8 @@ export default function FreelancerRequests() {
                             <strong>Legal Agreements:</strong>
                             <ul className="ml-4 list-disc">
                               {selectedRequest.legalAgreements?.agreements?.map((agreement: any) => (
+                                console.log(agreement),
+
                                 <li key={agreement.id}><strong>{agreement.id}:</strong> {agreement.accepted ? "Accepted" : "Not Accepted"}</li>
                               ))}
                               <li><strong>Work Authorization ID:</strong> {selectedRequest.legalAgreements?.workAuthorizationId}</li>
@@ -285,10 +293,10 @@ export default function FreelancerRequests() {
                             variant="default"
                             size="sm"
                             className="mt-4"
-                            onClick={() => acceptFreelancer(Number(selectedRequest?.id))}
-                            disabled={!!loading[Number(selectedRequest?.id)]}
+                            onClick={() => acceptFreelancer((selectedRequest?.id))}
+                            disabled={!!loading[(selectedRequest?.id)]}
                           >
-                            {loading[Number(selectedRequest?.id)] || "Accept Freelancer"}
+                            {loading[(selectedRequest?.id)] || "Accept Freelancer"}
                           </Button>
                         </div>
                       )}
